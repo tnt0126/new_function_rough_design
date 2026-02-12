@@ -4,13 +4,311 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Web Demo Hub</title>
+
+  <!-- Tailwind (optional but nice) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* small: avoid layout jump */
+    .skeleton { background: linear-gradient(90deg, #eef2ff 25%, #f8fafc 37%, #eef2ff 63%); background-size: 400% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% {background-position: 100% 0;} 100% {background-position: 0 0;} }
+  </style>
 </head>
-<body>
-  <h1>Web Demo Hub</h1>
-  <p>ここから各パターンに飛べます。</p>
-  <ul>
-    <li><a href="./pattern-a/">Pattern A</a></li>
-    <li><a href="./pattern-b/">Pattern B</a></li>
-  </ul>
+<body class="bg-white text-slate-900">
+  <main class="max-w-3xl mx-auto px-4 py-10">
+    <header class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-black tracking-tight">Web Demo Hub</h1>
+        <p class="mt-2 text-slate-600">
+          mainブランチのファイル名を参照して、公開ページ（HTML）へのリンクを自動生成します。
+        </p>
+      </div>
+      <a id="repoLink" class="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-bold"
+         target="_blank" rel="noreferrer">
+        GitHubを見る →
+      </a>
+    </header>
+
+    <section class="mt-8">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold px-2 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700">
+          対象：.html / （index.htmlがあるディレクトリ）
+        </span>
+        <span id="status" class="text-sm text-slate-600"></span>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div class="font-extrabold">公開ページ一覧</div>
+          <button id="btnReload" class="text-sm font-bold text-blue-600 hover:underline">再読み込み</button>
+        </div>
+
+        <div id="list" class="divide-y divide-slate-200">
+          <!-- skeleton -->
+          <div class="p-4">
+            <div class="h-4 w-2/3 rounded skeleton"></div>
+            <div class="mt-2 h-3 w-1/2 rounded skeleton"></div>
+          </div>
+          <div class="p-4">
+            <div class="h-4 w-3/5 rounded skeleton"></div>
+            <div class="mt-2 h-3 w-2/5 rounded skeleton"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 text-xs text-slate-500 leading-relaxed">
+        <p>※ GitHub APIのレート制限により、短時間に大量アクセスすると一覧取得が失敗することがあります。</p>
+        <p>※ Publicリポジトリ前提（認証なし）です。</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ===========================
+    // 設定（あなたのリポジトリ）
+    // ===========================
+    const OWNER = "tnt0126";
+    const REPO  = "new_function_rough_design";
+    const BRANCH = "main";
+
+    // 取得対象の拡張子（必要なら増やす）
+    const TARGET_EXT = [".html", ".htm"];
+
+    // どのくらい深く辿るか（無限にすると重くなるので制限）
+    const MAX_DEPTH = 6;
+
+    // GitHub API (contents)
+    const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+
+    // Pages URL base（Project Pages想定）
+    // 例: https://tnt0126.github.io/new_function_rough_design/
+    // NOTE: index.html 自身が Pages 上で動くので、location から作るのが安全
+    function getPagesBase() {
+      // 末尾 / を保証
+      const url = new URL(location.href);
+      // /repo/ or /repo/index.html どちらでもOKなように、repo直下に丸める
+      // pathname例:
+      // - /new_function_rough_design/
+      // - /new_function_rough_design/index.html
+      const parts = url.pathname.split("/").filter(Boolean);
+      // parts[0] が repo である前提（Project Pages）
+      const repoPart = parts[0] || REPO;
+      return `${url.origin}/${repoPart}/`;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function joinUrl(base, path) {
+      // base: .../repo/
+      // path: docs/a/index.html など
+      // encode each segment safely
+      const segs = path.split("/").filter(Boolean).map(encodeURIComponent);
+      return base + segs.join("/");
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url, {
+        headers: { "Accept": "application/vnd.github+json" }
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(()=> "");
+        throw new Error(`GitHub API error: ${res.status} ${res.statusText}${text ? " / " + text : ""}`);
+      }
+      return res.json();
+    }
+
+    async function listDir(path = "", depth = 0) {
+      if (depth > MAX_DEPTH) return [];
+
+      const url = `${API_BASE}${path ? "/" + path : ""}?ref=${encodeURIComponent(BRANCH)}`;
+      const data = await fetchJson(url);
+
+      // data is an array (directory) OR object (file)
+      if (!Array.isArray(data)) return [];
+
+      const files = [];
+      const dirs = [];
+
+      for (const item of data) {
+        if (item.type === "file") files.push(item);
+        if (item.type === "dir") dirs.push(item);
+      }
+
+      // gather html files in this directory
+      const htmlFiles = files
+        .filter(f => TARGET_EXT.some(ext => f.name.toLowerCase().endsWith(ext)));
+
+      // check index.html in dirs to create clean directory links
+      // (we'll confirm by peeking contents once; cheap enough for typical repo sizes)
+      const dirEntries = [];
+      for (const d of dirs) {
+        dirEntries.push(d);
+      }
+
+      // recurse
+      const nested = [];
+      for (const d of dirEntries) {
+        const childPath = d.path; // already includes parent
+        // recursively list
+        nested.push(...await listDir(childPath, depth + 1));
+      }
+
+      // add directory "pretty link" if it has index.html
+      // We'll use htmlFiles + nested info (if nested includes /dir/index.html).
+      // We'll compute after full traversal, outside.
+
+      return [
+        ...htmlFiles.map(f => ({ type: "file", path: f.path, name: f.name })),
+        ...nested
+      ];
+    }
+
+    function normalizeEntries(entries) {
+      // entries: list of html file paths
+      // Add "directory link" items for folders that have index.html
+      const set = new Set(entries.map(e => e.path));
+      const dirLinks = [];
+
+      for (const e of entries) {
+        const lower = e.name.toLowerCase();
+        if (lower === "index.html" || lower === "index.htm") {
+          // directory is path without '/index.html'
+          const dirPath = e.path.replace(/\/index\.html?$/i, "");
+          // avoid adding for root index (dirPath === "index.html" -> replacement yields "index.html"?)
+          // Actually root index: "index.html" has no slash, replacement won't match; handle separately
+          if (e.path.includes("/")) {
+            dirLinks.push({
+              type: "dir",
+              path: dirPath, // directory path
+              name: dirPath.split("/").pop() || dirPath
+            });
+          }
+        }
+      }
+
+      // Root index should be shown as Home
+      const rootIndex = entries.find(e => e.path.toLowerCase() === "index.html" || e.path.toLowerCase() === "index.htm");
+      const normalized = [];
+
+      if (rootIndex) {
+        normalized.push({ type: "home", path: "", name: "トップ（index.html）" });
+      }
+
+      // directory links (unique)
+      const seenDir = new Set();
+      for (const d of dirLinks) {
+        if (seenDir.has(d.path)) continue;
+        seenDir.add(d.path);
+        normalized.push(d);
+      }
+
+      // other html files (exclude index files already represented)
+      for (const e of entries) {
+        const lower = e.path.toLowerCase();
+        const isRootIndex = (lower === "index.html" || lower === "index.htm");
+        const isDirIndex = /\/index\.html?$/i.test(e.path);
+        if (isRootIndex) continue;
+        if (isDirIndex) continue; // represented by dir link
+        normalized.push({ type: "file", path: e.path, name: e.path });
+      }
+
+      // sort: home first, then dirs, then files
+      const rank = (t) => t === "home" ? 0 : t === "dir" ? 1 : 2;
+      normalized.sort((a,b) => rank(a.type) - rank(b.type) || a.name.localeCompare(b.name));
+
+      return normalized;
+    }
+
+    function render(entries) {
+      const base = getPagesBase();
+      const el = document.getElementById("list");
+      const status = document.getElementById("status");
+
+      const total = entries.length;
+      status.textContent = total ? `${total}件の公開ページ候補を検出` : "公開ページ候補が見つかりませんでした";
+
+      if (!total) {
+        el.innerHTML = `
+          <div class="p-6">
+            <div class="font-extrabold text-slate-900">対象が見つかりません</div>
+            <div class="mt-2 text-slate-600 text-sm">.html が main ブランチに存在するか確認してください。</div>
+          </div>
+        `;
+        return;
+      }
+
+      el.innerHTML = entries.map(item => {
+        let href, label, badge;
+
+        if (item.type === "home") {
+          href = base; // trailing slash => root index
+          label = "トップ";
+          badge = `<span class="text-xs font-extrabold px-2 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700">HOME</span>`;
+        } else if (item.type === "dir") {
+          href = base + item.path.split("/").map(encodeURIComponent).join("/") + "/";
+          label = item.path;
+          badge = `<span class="text-xs font-extrabold px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800">DIR</span>`;
+        } else {
+          href = joinUrl(base, item.path);
+          label = item.path;
+          badge = `<span class="text-xs font-extrabold px-2 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-700">FILE</span>`;
+        }
+
+        const safeLabel = escapeHtml(label);
+
+        return `
+          <div class="p-4 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                ${badge}
+                <div class="font-extrabold text-slate-900 truncate">${safeLabel}</div>
+              </div>
+              <div class="mt-1 text-xs text-slate-500 truncate">${escapeHtml(href)}</div>
+            </div>
+            <a class="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white text-sm font-extrabold hover:brightness-110 transition"
+               href="${href}" target="_blank" rel="noreferrer">
+              開く <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function main() {
+      const repoLink = document.getElementById("repoLink");
+      repoLink.href = `https://github.com/${OWNER}/${REPO}`;
+
+      const status = document.getElementById("status");
+      status.textContent = "GitHubからファイル一覧を取得中…";
+
+      try {
+        const raw = await listDir("", 0);
+        const normalized = normalizeEntries(raw);
+        render(normalized);
+      } catch (e) {
+        console.error(e);
+        document.getElementById("list").innerHTML = `
+          <div class="p-6">
+            <div class="font-extrabold text-slate-900">一覧取得に失敗しました</div>
+            <div class="mt-2 text-slate-600 text-sm">
+              ${escapeHtml(String(e.message || e))}
+            </div>
+            <div class="mt-3 text-xs text-slate-500">
+              対処: Publicリポジトリか確認 / しばらく待って再読み込み（GitHub APIのレート制限の可能性）
+            </div>
+          </div>
+        `;
+        status.textContent = "エラー";
+      }
+    }
+
+    document.getElementById("btnReload")?.addEventListener("click", () => {
+      location.reload();
+    });
+
+    main();
+  </script>
 </body>
 </html>
