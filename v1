@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Future Career Blueprint | Levtech Direct デモ</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Noto Sans JP', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            navy: '#1e3a8a',
+            trust: '#2563eb',
+            premium: '#FFD700',
+            cyan: '#22d3ee',
+            slatebg: '#0f172a'
+          },
+          boxShadow: {
+            glowGold: '0 0 0 1px rgba(255,215,0,.22), 0 0 40px rgba(255,215,0,.22)',
+            glowCyan: '0 0 0 1px rgba(34,211,238,.25), 0 0 40px rgba(34,211,238,.15)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Subtle premium grain */
+    .grain::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);
+      background-size: 18px 18px;
+      opacity:.14;
+      pointer-events:none;
+      mask-image: radial-gradient(circle at 30% 20%, black 0 55%, transparent 75%);
+    }
+
+    /* Animated particles (CSS-only) */
+    .particles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+    .p{
+      position:absolute;
+      width:6px; height:6px;
+      border-radius:999px;
+      background: radial-gradient(circle, rgba(34,211,238,.95), rgba(34,211,238,0) 70%);
+      filter: drop-shadow(0 0 14px rgba(34,211,238,.25));
+      animation: floatUp linear infinite;
+      opacity:.55;
+    }
+    .p.gold{
+      background: radial-gradient(circle, rgba(255,215,0,.95), rgba(255,215,0,0) 70%);
+      filter: drop-shadow(0 0 18px rgba(255,215,0,.22));
+      opacity:.45;
+    }
+    @keyframes floatUp {
+      from { transform: translate3d(0, 24px, 0) scale(.9); }
+      to   { transform: translate3d(0, -920px, 0) scale(1.2); }
+    }
+
+    /* Light sweep accent */
+    .shine {
+      position:absolute; inset:-40% -40%;
+      background: conic-gradient(from 210deg at 50% 50%,
+        rgba(255,255,255,0) 0deg,
+        rgba(255,255,255,.08) 25deg,
+        rgba(255,255,255,0) 55deg,
+        rgba(255,255,255,0) 360deg
+      );
+      animation: sweep 9s linear infinite;
+      mix-blend-mode: overlay;
+      opacity:.55;
+      pointer-events:none;
+    }
+    @keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Timeline connector */
+    .connector::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:18px;
+      bottom:18px;
+      width:2px;
+      transform: translateX(-50%);
+      background: linear-gradient(to bottom,
+        rgba(148,163,184,.25),
+        rgba(34,211,238,.25),
+        rgba(255,215,0,.35)
+      );
+      border-radius:999px;
+    }
+
+    /* Fancy focus */
+    :focus-visible { outline: 2px solid rgba(34,211,238,.85); outline-offset: 3px; }
+  </style>
+</head>
+
+<body class="font-sans text-slate-900 bg-white">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-trust to-navy grid place-items-center shadow-glowCyan">
+          <i class="fa-solid fa-bolt text-white text-sm"></i>
+        </div>
+        <div class="leading-tight">
+          <div class="font-extrabold tracking-tight text-slate-900">Levtech Direct</div>
+          <div class="text-[11px] text-slate-500">Future Career Blueprint（デモ）</div>
+        </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a class="text-slate-600 hover:text-slate-900" href="#gap">ギャップ可視化</a>
+        <a class="text-slate-600 hover:text-slate-900" href="#missing">Missing Link</a>
+        <a class="text-slate-600 hover:text-slate-900" href="#simulation">シミュレーション</a>
+        <a class="text-slate-600 hover:text-slate-900" href="#jobs">おすすめ求人</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <button id="btnScrollCta" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-trust text-white text-sm font-bold shadow hover:shadow-lg transition">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          デモを体験
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="gap" class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-slatebg to-navy"></div>
+    <div class="particles" aria-hidden="true" id="particles"></div>
+    <div class="shine" aria-hidden="true"></div>
+
+    <div class="relative max-w-6xl mx-auto px-4 py-16 md:py-20">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <!-- Left -->
+        <div class="text-white">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs">
+            <i class="fa-solid fa-shield-halved text-cyan"></i>
+            信頼できるデータで、未来を設計
+          </div>
+
+          <h1 class="mt-4 text-3xl md:text-5xl font-black tracking-tight leading-[1.15]">
+            あなたのキャリアは、<span class="text-cyan">ここから加速</span>する。
+          </h1>
+
+          <p class="mt-4 text-white/80 leading-relaxed">
+            Future Career Blueprintは「今のあなた」と「理想の未来」を並べて見える化し、
+            <span class="text-white font-bold">“次に積むべき経験（Missing Link）”</span>まで具体化します。
+          </p>
+
+          <!-- Salary comparison -->
+          <div class="mt-8 grid sm:grid-cols-2 gap-4">
+            <div class="relative rounded-2xl p-5 bg-white/8 border border-white/15">
+              <div class="flex items-center justify-between">
+                <div class="text-white/70 text-sm">現在の年収</div>
+                <span class="text-[11px] px-2 py-1 rounded-full bg-white/10 border border-white/15">現状</span>
+              </div>
+              <div class="mt-2 text-2xl font-extrabold tracking-tight">
+                550〜650<span class="text-base font-bold text-white/80">万</span>
+              </div>
+              <div class="mt-3 text-xs text-white/70 flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-cyan"></i>
+                直近の実務経験をベースに推定（デモ）
+              </div>
+            </div>
+
+            <div class="relative rounded-2xl p-5 bg-gradient-to-br from-premium/25 to-white/5 border border-premium/35 shadow-glowGold">
+              <div class="flex items-center justify-between">
+                <div class="text-white/80 text-sm">理想の年収</div>
+                <span class="text-[11px] px-2 py-1 rounded-full bg-premium/25 border border-premium/40 text-premium font-bold">
+                  未来
+                </span>
+              </div>
+              <div class="mt-2 text-3xl md:text-4xl font-black tracking-tight text-premium drop-shadow">
+                1000〜1200<span class="text-base md:text-lg font-bold text-white/85">万</span>
+              </div>
+              <div class="mt-3 text-xs text-white/80 flex items-center gap-2">
+                <i class="fa-solid fa-star text-premium"></i>
+                VPoE/Staff級まで到達した場合のレンジ（デモ）
+              </div>
+            </div>
+          </div>
+
+          <!-- CTA row -->
+          <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <button id="btnPrimary" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-cyan text-slate-900 font-extrabold shadow-glowCyan hover:brightness-110 transition">
+              <i class="fa-solid fa-play"></i> ギャップを可視化する
+            </button>
+            <a href="#jobs" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-bold hover:bg-white/15 transition">
+              <i class="fa-solid fa-briefcase"></i> GAPを埋める求人を見る
+            </a>
+          </div>
+
+          <!-- Trust badges -->
+          <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div class="rounded-xl p-3 bg-white/8 border border-white/15">
+              <div class="font-extrabold"><i class="fa-solid fa-lock text-cyan mr-2"></i>安心設計</div>
+              <div class="text-white/70 mt-1">個人情報は最小</div>
+            </div>
+            <div class="rounded-xl p-3 bg-white/8 border border-white/15">
+              <div class="font-extrabold"><i class="fa-solid fa-microchip text-cyan mr-2"></i>先進UI</div>
+              <div class="text-white/70 mt-1">差分を即表示</div>
+            </div>
+            <div class="rounded-xl p-3 bg-white/8 border border-white/15">
+              <div class="font-extrabold"><i class="fa-solid fa-chart-line text-cyan mr-2"></i>成長導線</div>
+              <div class="text-white/70 mt-1">次の一手が明確</div>
+            </div>
+            <div class="rounded-xl p-3 bg-white/8 border border-white/15">
+              <div class="font-extrabold"><i class="fa-solid fa-crown text-premium mr-2"></i>プレミアム感</div>
+              <div class="text-white/70 mt-1">未来への期待値</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Radar card -->
+        <div class="relative">
+          <div class="relative rounded-3xl p-6 md:p-7 bg-white/7 border border-white/15 grain overflow-hidden">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-white font-extrabold text-lg tracking-tight">
+                  ギャップ・レーダー
+                </div>
+                <div class="text-white/70 text-sm mt-1">
+                  「現在（青）」vs「理想（ゴールド）」の差分を可視化
+                </div>
+              </div>
+              <div class="hidden sm:flex items-center gap-2 text-xs">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/85">
+                  <span class="w-2.5 h-2.5 rounded-full bg-trust"></span>現在のあなた
+                </span>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-premium/20 border border-premium/35 text-white/90">
+                  <span class="w-2.5 h-2.5 rounded-full" style="background:#FFD700;"></span>理想の未来
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <canvas id="radarChart" height="280"></canvas>
+            </div>
+
+            <div class="mt-6 grid md:grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl p-4 bg-white/8 border border-white/15">
+                <div class="flex items-center gap-2 font-bold text-white">
+                  <i class="fa-solid fa-circle-nodes text-cyan"></i> 重点GAP
+                </div>
+                <ul class="mt-2 text-white/75 space-y-1">
+                  <li>・役割：<span class="text-white font-bold">テックリード → 組織/事業</span></li>
+                  <li>・商流：<span class="text-white font-bold">受託 → 事業会社/戦略PJ</span></li>
+                  <li>・希少性：<span class="text-white font-bold">Go × Platform × マネジメント</span></li>
+                </ul>
+              </div>
+
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-cyan/20 to-white/5 border border-cyan/35">
+                <div class="flex items-center gap-2 font-bold text-white">
+                  <i class="fa-solid fa-lightbulb text-premium"></i> 次の一手（デモ）
+                </div>
+                <ul class="mt-2 text-white/80 space-y-1">
+                  <li>・Goで<span class="text-white font-bold">高トラフィック</span>領域を担当</li>
+                  <li>・チームの<span class="text-white font-bold">採用/育成</span>に関与</li>
+                  <li>・事業KPIへ<span class="text-white font-bold">技術で貢献</span></li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Floating hint -->
+          <div class="absolute -bottom-6 -left-6 hidden lg:block">
+            <div class="rounded-2xl px-4 py-3 bg-white shadow-xl border border-slate-200">
+              <div class="text-xs text-slate-500">クリックで体験</div>
+              <div class="font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-hand-pointer text-trust"></i>
+                Missing Link を自動抽出
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Missing Links -->
+  <section id="missing" class="py-16 md:py-20">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-700">
+            <i class="fa-solid fa-puzzle-piece text-trust"></i>
+            Missing Links
+          </div>
+          <h2 class="mt-3 text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+            理想に到達するために足りない<span class="text-trust">3つの要素</span>
+          </h2>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            抽象スコアではなく、<span class="font-bold text-slate-900">具体的な経験・スキル</span>として提示します（デモ）。
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button id="btnShuffle" class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 hover:bg-slate-50 transition">
+            <i class="fa-solid fa-rotate mr-2 text-trust"></i>内容を入れ替える（デモ）
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-10 grid md:grid-cols-3 gap-5" id="missingCards"></div>
+
+      <div class="mt-10 rounded-3xl p-6 md:p-8 bg-gradient-to-br from-slate-900 to-navy text-white overflow-hidden relative">
+        <div class="absolute inset-0 opacity-40">
+          <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-cyan/30 blur-3xl"></div>
+          <div class="absolute -bottom-28 -left-28 w-80 h-80 rounded-full bg-premium/25 blur-3xl"></div>
+        </div>
+        <div class="relative grid md:grid-cols-3 gap-6 items-center">
+          <div class="md:col-span-2">
+            <div class="text-sm text-white/70">Blueprintの狙い</div>
+            <div class="mt-2 text-xl md:text-2xl font-extrabold tracking-tight">
+              「転職する/しない」ではなく、<span class="text-cyan">未来に届く経験</span>を先に決める。
+            </div>
+            <div class="mt-3 text-white/80 leading-relaxed">
+              どの求人が“良い”かではなく、あなたの理想に必要な「Missing Link」を埋められるかで求人を選ぶ。
+              それが、迷いを減らして意思決定を速くします。
+            </div>
+          </div>
+
+          <div class="md:justify-self-end">
+            <a href="#simulation" class="inline-flex items-center justify-center gap-2 w-full md:w-auto px-5 py-3 rounded-2xl bg-premium text-slate-900 font-extrabold shadow-glowGold hover:brightness-110 transition">
+              <i class="fa-solid fa-forward"></i> 未来シミュレーションへ
+            </a>
+            <div class="mt-2 text-xs text-white/70 text-center md:text-left">
+              ※デモのため数値/求人は仮データです
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Simulation -->
+  <section id="simulation" class="py-16 md:py-20 bg-slate-50">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-end justify-between gap-6 flex-wrap">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-xs text-slate-700">
+            <i class="fa-solid fa-route text-trust"></i>
+            Simulation
+          </div>
+          <h2 class="mt-3 text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+            現状維持の未来 vs 挑戦した未来
+          </h2>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            “何が変わるか”をタイムラインで比較。挑戦ルートは、<span class="font-bold text-slate-900">年収1200万</span>や<span class="font-bold text-slate-900">VPoE</span>など、到達イメージを強調します。
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button id="btnToggleLayout" class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-800 hover:bg-slate-50 transition">
+            <i class="fa-solid fa-arrows-rotate mr-2 text-trust"></i>表示切替（左右/上下）
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-10 grid lg:grid-cols-2 gap-6" id="simGrid">
+        <!-- Route: stay -->
+        <div class="rounded-3xl p-6 bg-white border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 rounded-2xl bg-slate-100 grid place-items-center">
+                <i class="fa-solid fa-hourglass-half text-slate-500"></i>
+              </div>
+              <div>
+                <div class="font-extrabold text-slate-900">現状維持ルート</div>
+                <div class="text-xs text-slate-500">停滞しやすい未来</div>
+              </div>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-600 font-bold">グレー</span>
+          </div>
+
+          <div class="mt-5 relative connector">
+            <div class="space-y-4">
+              <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200">
+                <div class="text-xs text-slate-500">6ヶ月</div>
+                <div class="mt-1 font-bold text-slate-900">主担当は増えるが、裁量は限定的</div>
+                <div class="mt-2 text-sm text-slate-600">受託中心で、技術選定の自由度が低いまま。</div>
+              </div>
+              <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200">
+                <div class="text-xs text-slate-500">1年</div>
+                <div class="mt-1 font-bold text-slate-900">年収 650〜750万 付近で頭打ち</div>
+                <div class="mt-2 text-sm text-slate-600">希少な経験が増えず、市場価値の伸びが鈍い。</div>
+              </div>
+              <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200">
+                <div class="text-xs text-slate-500">2年</div>
+                <div class="mt-1 font-bold text-slate-900">責任は増えるが、キャリアの選択肢が増えない</div>
+                <div class="mt-2 text-sm text-slate-600">“強い肩書き”に繋がる実績が作りづらい。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Route: challenge -->
+        <div class="rounded-3xl p-6 bg-gradient-to-br from-slatebg to-navy text-white border border-white/10 shadow-glowGold relative overflow-hidden">
+          <div class="absolute inset-0 opacity-35">
+            <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-premium/35 blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-cyan/25 blur-3xl"></div>
+          </div>
+
+          <div class="relative flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 rounded-2xl bg-premium/20 border border-premium/35 grid place-items-center shadow-glowGold">
+                <i class="fa-solid fa-rocket text-premium"></i>
+              </div>
+              <div>
+                <div class="font-extrabold">挑戦ルート</div>
+                <div class="text-xs text-white/70">右肩上がりの未来</div>
+              </div>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-full bg-premium/20 border border-premium/35 text-premium font-extrabold">ゴールド</span>
+          </div>
+
+          <div class="mt-5 relative connector">
+            <div class="space-y-4">
+              <div class="rounded-2xl p-4 bg-white/7 border border-white/12">
+                <div class="text-xs text-white/65">3ヶ月</div>
+                <div class="mt-1 font-extrabold text-white">Goで高トラフィック領域を担当</div>
+                <div class="mt-2 text-sm text-white/75">スケール課題（レイテンシ/コスト）を技術で解決。</div>
+                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                  <span class="px-2 py-1 rounded-full bg-cyan/20 border border-cyan/35 text-white">Go</span>
+                  <span class="px-2 py-1 rounded-full bg-cyan/20 border border-cyan/35 text-white">SRE/Platform</span>
+                  <span class="px-2 py-1 rounded-full bg-premium/20 border border-premium/35 text-white">意思決定</span>
+                </div>
+              </div>
+
+              <div class="rounded-2xl p-4 bg-white/7 border border-white/12">
+                <div class="text-xs text-white/65">1年</div>
+                <div class="mt-1 font-extrabold text-white">テックリードとして採用・育成に関与</div>
+                <div class="mt-2 text-sm text-white/75">組織レバレッジ（人・仕組み）で成果を伸ばす。</div>
+                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                  <span class="px-2 py-1 rounded-full bg-premium/20 border border-premium/35 text-white">マネジメント</span>
+                  <span class="px-2 py-1 rounded-full bg-premium/20 border border-premium/35 text-white">採用</span>
+                  <span class="px-2 py-1 rounded-full bg-cyan/20 border border-cyan/35 text-white">開発生産性</span>
+                </div>
+              </div>
+
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-premium/25 to-white/6 border border-premium/35 shadow-glowGold">
+                <div class="text-xs text-white/70">2年</div>
+                <div class="mt-1 text-xl font-black tracking-tight text-premium">
+                  VPoE / 年収 1200万 に到達
+                </div>
+                <div class="mt-2 text-sm text-white/80">
+                  技術×事業×組織の三位一体で、会社の成長エンジンになる。
+                </div>
+                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                  <span class="px-2 py-1 rounded-full bg-premium/25 border border-premium/45 text-white">VPoE</span>
+                  <span class="px-2 py-1 rounded-full bg-premium/25 border border-premium/45 text-white">事業KPI貢献</span>
+                  <span class="px-2 py-1 rounded-full bg-cyan/20 border border-cyan/35 text-white">希少性</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative mt-6 flex flex-col sm:flex-row gap-3">
+            <button id="btnReveal" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-cyan text-slate-900 font-extrabold shadow-glowCyan hover:brightness-110 transition w-full sm:w-auto">
+              <i class="fa-solid fa-unlock-keyhole"></i> Missing Link を表示
+            </button>
+            <div id="revealBox" class="hidden rounded-2xl p-4 bg-white/7 border border-white/12 w-full">
+              <div class="text-xs text-white/65">この挑戦ルートで埋まるもの</div>
+              <div class="mt-1 font-extrabold text-white">「Go × Platform × マネジメント」</div>
+              <div class="mt-2 text-sm text-white/75">希少性の高い組み合わせで、市場価値が跳ね上がる。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Job Recommendation -->
+  <section id="jobs" class="py-16 md:py-20">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-end justify-between gap-6 flex-wrap">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-700">
+            <i class="fa-solid fa-briefcase text-trust"></i>
+            Job Recommendation
+          </div>
+          <h2 class="mt-3 text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+            あなたの<span class="text-trust">GAPを埋める求人</span>
+          </h2>
+          <p class="mt-2 text-slate-600 leading-relaxed">
+            “通常の求人票”ではなく、<span class="font-bold text-slate-900">この求人で得られる経験（Missing Link）</span>を主役にしたUIです（デモ）。
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="hidden sm:flex items-center gap-2 text-xs">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-700">
+              <i class="fa-solid fa-tag text-trust"></i>スキルタグ
+            </span>
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-premium/15 border border-premium/35 text-slate-800">
+              <i class="fa-solid fa-bullseye text-premium"></i>マッチ度
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10 grid lg:grid-cols-3 gap-5" id="jobCards"></div>
+
+      <div class="mt-10 rounded-3xl p-6 md:p-8 bg-slate-50 border border-slate-200">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div class="text-sm text-slate-500">次のアクション</div>
+            <div class="mt-1 text-xl md:text-2xl font-extrabold tracking-tight text-slate-900">
+              “理想の未来”に届く求人だけを、最短で見つける。
+            </div>
+            <div class="mt-2 text-slate-600">
+              このデモはUI例です。実運用ではあなたの履歴/志向性に合わせて、Missing Linkが自動で更新されます。
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <a href="#gap" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-extrabold hover:bg-slate-50 transition">
+              <i class="fa-solid fa-arrow-up"></i> ギャップへ戻る
+            </a>
+            <button class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-trust text-white font-extrabold hover:brightness-110 transition shadow">
+              <i class="fa-solid fa-paper-plane"></i> Levtech Directで相談
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-10 text-xs text-slate-500">
+        © Levtech Direct（デモ） / Future Career Blueprint
+      </footer>
+    </div>
+  </section>
+
+  <script>
+    // -----------------------------
+    // Particles (CSS divs)
+    // -----------------------------
+    (function initParticles() {
+      const root = document.getElementById('particles');
+      if (!root) return;
+
+      const count = 26;
+      const rand = (min, max) => Math.random() * (max - min) + min;
+
+      for (let i = 0; i < count; i++) {
+        const d = document.createElement('div');
+        d.className = 'p' + (Math.random() > 0.72 ? ' gold' : '');
+        d.style.left = rand(0, 100) + '%';
+        d.style.top = rand(30, 110) + '%';
+        d.style.animationDuration = rand(7, 15) + 's';
+        d.style.animationDelay = rand(0, 7) + 's';
+        const size = rand(4, 8);
+        d.style.width = size + 'px';
+        d.style.height = size + 'px';
+        root.appendChild(d);
+      }
+    })();
+
+    // -----------------------------
+    // Smooth scroll helpers
+    // -----------------------------
+    function smoothScrollTo(selector) {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('btnPrimary')?.addEventListener('click', () => smoothScrollTo('#missing'));
+    document.getElementById('btnScrollCta')?.addEventListener('click', () => smoothScrollTo('#gap'));
+
+    // -----------------------------
+    // Radar Chart (Chart.js)
+    // -----------------------------
+    const ctx = document.getElementById('radarChart');
+    const radar = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['技術', '役割', '商流', 'ビジネス貢献', '希少性'],
+        datasets: [
+          {
+            label: '現在のあなた',
+            data: [3, 2, 2, 2, 2],
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.18)',
+            pointBackgroundColor: '#2563eb',
+            pointBorderColor: '#ffffff',
+            pointHoverBackgroundColor: '#2563eb',
+            pointHoverBorderColor: '#ffffff',
+            borderWidth: 2,
+          },
+          {
+            label: '理想の未来',
+            data: [5, 5, 4, 5, 5],
+            borderColor: '#FFD700',
+            backgroundColor: 'rgba(255, 215, 0, 0.14)',
+            pointBackgroundColor: '#FFD700',
+            pointBorderColor: 'rgba(255,255,255,.9)',
+            borderWidth: 2,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: 'rgba(255,255,255,.9)', font: { weight: '700' } }
+          },
+          tooltip: {
+            callbacks: {
+              // Avoid abstract decimals; keep it simple text
+              label: (ctx) => `${ctx.dataset.label}: レベル ${ctx.formattedValue}/5`
+            }
+          }
+        },
+        scales: {
+          r: {
+            min: 0,
+            max: 5,
+            ticks: {
+              stepSize: 1,
+              showLabelBackdrop: false,
+              color: 'rgba(255,255,255,.55)'
+            },
+            grid: { color: 'rgba(255,255,255,.14)' },
+            angleLines: { color: 'rgba(255,255,255,.14)' },
+            pointLabels: {
+              color: 'rgba(255,255,255,.92)',
+              font: { size: 12, weight: '700' }
+            }
+          }
+        },
+        elements: {
+          line: { tension: 0.25 }
+        }
+      }
+    });
+
+    // -----------------------------
+    // Missing Links cards (Demo data)
+    // -----------------------------
+    const missingSets = [
+      [
+        {
+          icon: 'fa-code',
+          title: 'Go × 高トラフィック設計',
+          gap: '不足している要素：スケール課題の実戦経験',
+          must: ['Go言語（本番運用）', 'レイテンシ/コスト最適化', 'SRE連携（SLI/SLO）'],
+          accent: 'cyan'
+        },
+        {
+          icon: 'fa-people-group',
+          title: 'チームリード/育成',
+          gap: '不足している要素：人と仕組みで成果を伸ばす経験',
+          must: ['1on1/評価補助', '採用（面接/要件定義）', '開発プロセス改善'],
+          accent: 'gold'
+        },
+        {
+          icon: 'fa-chart-simple',
+          title: '事業KPIへの直結',
+          gap: '不足している要素：技術→売上/継続率の接続',
+          must: ['North Star KPI理解', '施策の効果測定', 'Biz/PMとの意思決定'],
+          accent: 'navy'
+        }
+      ],
+      [
+        {
+          icon: 'fa-database',
+          title: 'Platform領域の主担当',
+          gap: '不足している要素：基盤の標準化と内製化',
+          must: ['CI/CD整備', 'Observability', '権限/セキュリティ設計'],
+          accent: 'cyan'
+        },
+        {
+          icon: 'fa-sitemap',
+          title: 'アーキテクチャ意思決定',
+          gap: '不足している要素：設計の説明責任と合意形成',
+          must: ['ADR運用', 'ロードマップ策定', 'トレードオフ整理'],
+          accent: 'gold'
+        },
+        {
+          icon: 'fa-handshake',
+          title: '上流（商流）を上げる',
+          gap: '不足している要素：経営/事業側との距離',
+          must: ['予算感の理解', '企画段階から参画', '技術投資の説明'],
+          accent: 'navy'
+        }
+      ]
+    ];
+
+    let missingIndex = 0;
+    const missingRoot = document.getElementById('missingCards');
+
+    function accentBadge(accent) {
+      if (accent === 'gold') {
+        return `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-premium/15 border border-premium/40 text-slate-900 text-xs font-extrabold">
+          <i class="fa-solid fa-star text-premium"></i> 優先度：高
+        </span>`;
+      }
+      if (accent === 'cyan') {
+        return `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan/15 border border-cyan/40 text-slate-900 text-xs font-extrabold">
+          <i class="fa-solid fa-wave-square text-trust"></i> 伸びしろ：大
+        </span>`;
+      }
+      return `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-extrabold">
+        <i class="fa-solid fa-circle-notch text-slate-500"></i> 基盤
+      </span>`;
+    }
+
+    function renderMissing() {
+      if (!missingRoot) return;
+      const items = missingSets[missingIndex];
+
+      missingRoot.innerHTML = items.map((x) => {
+        const accentBorder =
+          x.accent === 'gold' ? 'border-premium/40' :
+          x.accent === 'cyan' ? 'border-cyan/35' :
+          'border-slate-200';
+
+        const accentShadow =
+          x.accent === 'gold' ? 'shadow-glowGold' :
+          x.accent === 'cyan' ? 'shadow-glowCyan' :
+          'shadow-sm';
+
+        const iconBg =
+          x.accent === 'gold' ? 'bg-premium/15 border-premium/35' :
+          x.accent === 'cyan' ? 'bg-cyan/15 border-cyan/35' :
+          'bg-slate-100 border-slate-200';
+
+        return `
+          <article class="rounded-3xl p-6 bg-white border ${accentBorder} ${accentShadow} transition hover:-translate-y-0.5 hover:shadow-lg">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl border ${iconBg} grid place-items-center">
+                  <i class="fa-solid ${x.icon} ${x.accent === 'gold' ? 'text-premium' : x.accent === 'cyan' ? 'text-trust' : 'text-slate-700'}"></i>
+                </div>
+                <div>
+                  <div class="font-extrabold text-slate-900">${x.title}</div>
+                  <div class="mt-1 text-xs text-slate-500">理想に近づく“Missing Link”</div>
+                </div>
+              </div>
+              ${accentBadge(x.accent)}
+            </div>
+
+            <div class="mt-4 rounded-2xl p-4 bg-slate-50 border border-slate-200">
+              <div class="text-xs text-slate-500">GAPの内容</div>
+              <div class="mt-1 font-bold text-slate-900">${x.gap}</div>
+            </div>
+
+            <div class="mt-4">
+              <div class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-award ${x.accent === 'gold' ? 'text-premium' : x.accent === 'cyan' ? 'text-trust' : 'text-slate-700'}"></i>
+                獲得すべき経験
+              </div>
+              <ul class="mt-2 space-y-2">
+                ${x.must.map(m => `
+                  <li class="flex items-start gap-2 text-sm text-slate-700">
+                    <i class="fa-solid fa-check mt-1 ${x.accent === 'gold' ? 'text-premium' : x.accent === 'cyan' ? 'text-cyan' : 'text-slate-500'}"></i>
+                    <span>${m}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <div class="mt-5 flex items-center justify-between">
+              <div class="text-xs text-slate-500">この要素を埋める求人を下で提示</div>
+              <a href="#jobs" class="text-sm font-extrabold text-trust hover:underline inline-flex items-center gap-2">
+                求人へ <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    renderMissing();
+
+    document.getElementById('btnShuffle')?.addEventListener('click', () => {
+      missingIndex = (missingIndex + 1) % missingSets.length;
+      renderMissing();
+      // micro highlight
+      missingRoot?.animate([{opacity: .5, transform: 'translateY(4px)'},{opacity: 1, transform:'translateY(0)'}], { duration: 240, easing: 'ease-out' });
+    });
+
+    // -----------------------------
+    // Simulation UI interactions
+    // -----------------------------
+    document.getElementById('btnReveal')?.addEventListener('click', () => {
+      const box = document.getElementById('revealBox');
+      if (!box) return;
+      box.classList.toggle('hidden');
+      box.animate([{opacity:0, transform:'translateY(6px)'},{opacity:1, transform:'translateY(0)'}], { duration: 220, easing: 'ease-out' });
+    });
+
+    let vertical = false;
+    document.getElementById('btnToggleLayout')?.addEventListener('click', () => {
+      const grid = document.getElementById('simGrid');
+      if (!grid) return;
+      vertical = !vertical;
+      // Toggle between side-by-side and stacked on larger screens for demo
+      grid.classList.toggle('lg:grid-cols-2', !vertical);
+      grid.classList.toggle('lg:grid-cols-1', vertical);
+      grid.animate([{opacity:.6},{opacity:1}], { duration: 180, easing: 'ease-out' });
+    });
+
+    // -----------------------------
+    // Job Cards (Demo data)
+    // -----------------------------
+    const jobs = [
+      {
+        title: 'Go / Platform Engineer（事業会社）',
+        salary: '年収 900〜1200万',
+        match: 'マッチ度：高',
+        company: 'B2C大規模プロダクト',
+        missingLink: 'Goで高トラフィック領域を“主担当”として持つ',
+        tags: ['Go', 'SRE', 'Observability', 'マイクロサービス'],
+        highlights: [
+          'レイテンシ/コストの改善をKPIに直結させる',
+          'SLI/SLO運用をリード',
+          '設計レビューとADR文化'
+        ],
+        accent: 'gold'
+      },
+      {
+        title: 'Tech Lead（プロダクト開発）',
+        salary: '年収 800〜1100万',
+        match: 'マッチ度：中〜高',
+        company: '成長フェーズSaaS',
+        missingLink: '採用/育成を含むチーム成果の最大化',
+        tags: ['テックリード', '採用', '育成', '開発生産性'],
+        highlights: [
+          '面接設計・要件定義から関与',
+          '1on1・評価補助の経験が積める',
+          '開発プロセスの改善を推進'
+        ],
+        accent: 'cyan'
+      },
+      {
+        title: 'Engineering Manager（新規事業）',
+        salary: '年収 950〜1300万',
+        match: 'マッチ度：中',
+        company: '0→1/1→10組織',
+        missingLink: '事業KPIへ技術でコミットする意思決定経験',
+        tags: ['EM', '事業KPI', 'ロードマップ', '意思決定'],
+        highlights: [
+          'Biz/PMとロードマップを共同策定',
+          '技術投資の説明責任を担う',
+          '組織づくりの実績を作れる'
+        ],
+        accent: 'navy'
+      }
+    ];
+
+    const jobRoot = document.getElementById('jobCards');
+
+    function chip(text, accent) {
+      const cls =
+        accent === 'gold'
+          ? 'bg-premium/15 border-premium/35 text-slate-900'
+          : accent === 'cyan'
+            ? 'bg-cyan/15 border-cyan/35 text-slate-900'
+            : 'bg-slate-100 border-slate-200 text-slate-800';
+      return `<span class="px-2.5 py-1 rounded-full border text-xs font-extrabold ${cls}">${text}</span>`;
+    }
+
+    function renderJobs() {
+      if (!jobRoot) return;
+
+      jobRoot.innerHTML = jobs.map(j => {
+        const frame =
+          j.accent === 'gold'
+            ? 'border-premium/40 shadow-glowGold'
+            : j.accent === 'cyan'
+              ? 'border-cyan/35 shadow-glowCyan'
+              : 'border-slate-200 shadow-sm';
+
+        const badge =
+          j.accent === 'gold'
+            ? `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-premium/15 border border-premium/40 text-xs font-extrabold text-slate-900">
+                <i class="fa-solid fa-crown text-premium"></i> ${j.match}
+              </span>`
+            : j.accent === 'cyan'
+              ? `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan/15 border border-cyan/35 text-xs font-extrabold text-slate-900">
+                  <i class="fa-solid fa-bullseye text-trust"></i> ${j.match}
+                </span>`
+              : `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-700">
+                  <i class="fa-solid fa-bullseye text-slate-500"></i> ${j.match}
+                </span>`;
+
+        return `
+          <article class="rounded-3xl p-6 bg-white border ${frame} transition hover:-translate-y-0.5 hover:shadow-lg">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-xs text-slate-500">${j.company}</div>
+                <div class="mt-1 font-black text-slate-900 text-lg leading-snug">${j.title}</div>
+              </div>
+              ${badge}
+            </div>
+
+            <div class="mt-4 flex items-center justify-between">
+              <div class="text-sm font-extrabold text-slate-900">${j.salary}</div>
+              <div class="text-xs text-slate-500"><i class="fa-solid fa-shield text-trust mr-1"></i>デモ求人</div>
+            </div>
+
+            <div class="mt-4 rounded-2xl p-4 bg-slate-50 border border-slate-200">
+              <div class="text-xs text-slate-500">この求人で得られる経験（Missing Link）</div>
+              <div class="mt-1 font-extrabold text-slate-900">${j.missingLink}</div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              ${j.tags.map(t => chip(t, j.accent)).join('')}
+            </div>
+
+            <div class="mt-5">
+              <div class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-sparkles ${j.accent === 'gold' ? 'text-premium' : j.accent === 'cyan' ? 'text-trust' : 'text-slate-700'}"></i>
+                伸びるポイント
+              </div>
+              <ul class="mt-2 space-y-2">
+                ${j.highlights.map(h => `
+                  <li class="flex items-start gap-2 text-sm text-slate-700">
+                    <i class="fa-solid fa-check mt-1 ${j.accent === 'gold' ? 'text-premium' : j.accent === 'cyan' ? 'text-cyan' : 'text-slate-500'}"></i>
+                    <span>${h}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <div class="mt-6 flex items-center gap-3">
+              <button class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-trust text-white font-extrabold hover:brightness-110 transition">
+                <i class="fa-solid fa-magnifying-glass"></i> 詳細を見る
+              </button>
+              <button class="inline-flex items-center justify-center w-11 h-11 rounded-2xl border border-slate-200 hover:bg-slate-50 transition" title="保存（デモ）">
+                <i class="fa-regular fa-bookmark text-slate-700"></i>
+              </button>
+            </div>
+
+            <div class="mt-3 text-xs text-slate-500">
+              ※実際はあなたの履歴に合わせて「Missing Link」や求人がリアルタイム更新されます。
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    renderJobs();
+  </script>
+</body>
+</html>
