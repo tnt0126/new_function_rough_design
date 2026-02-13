@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Future Career Blueprint | Levtech Direct デモ</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Noto Sans JP','ui-sans-serif','system-ui'] },
+          colors: {
+            navy: '#1e3a8a',
+            trust: '#2563eb',
+            premium: '#FFD700',
+            cyan: '#22d3ee',
+            ink: '#0f172a',
+          },
+          boxShadow: {
+            glow: '0 0 0 1px rgba(34,211,238,.18), 0 20px 60px rgba(30,58,138,.22)',
+            gold: '0 0 0 1px rgba(255,215,0,.25), 0 18px 50px rgba(255,215,0,.18)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root { color-scheme: light; }
+    /* 微細パーティクル & スキャン光 */
+    .hero-bg {
+      background:
+        radial-gradient(1200px 420px at 10% 0%, rgba(34,211,238,.18), transparent 60%),
+        radial-gradient(900px 380px at 90% 20%, rgba(255,215,0,.12), transparent 55%),
+        linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0b2a5a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/120px 120px,
+        radial-gradient(circle at 80% 60%, rgba(255,255,255,.08) 0 1px, transparent 2px) 0 0/160px 160px,
+        radial-gradient(circle at 40% 80%, rgba(255,255,255,.06) 0 1px, transparent 2px) 0 0/200px 200px;
+      opacity:.55;
+      animation: drift 18s linear infinite;
+      pointer-events:none;
+    }
+    .hero-bg::after{
+      content:"";
+      position:absolute;
+      top:-40%; left:-20%;
+      width: 140%; height: 180%;
+      background: linear-gradient(120deg, transparent 35%, rgba(34,211,238,.10) 45%, rgba(255,215,0,.08) 52%, transparent 62%);
+      transform: rotate(8deg);
+      animation: sweep 6.5s ease-in-out infinite;
+      pointer-events:none;
+      filter: blur(2px);
+    }
+    @keyframes drift {
+      0%{ transform: translate3d(0,0,0) }
+      50%{ transform: translate3d(-24px, 18px, 0) }
+      100%{ transform: translate3d(0,0,0) }
+    }
+    @keyframes sweep {
+      0%,100%{ transform: translate3d(-6%, -4%, 0) rotate(8deg); opacity:.35}
+      50%{ transform: translate3d(6%, 4%, 0) rotate(8deg); opacity:.70}
+    }
+
+    /* Gold glow ring */
+    .gold-ring { box-shadow: 0 0 0 1px rgba(255,215,0,.35), 0 0 30px rgba(255,215,0,.20); }
+
+    /* Smooth section reveal */
+    .reveal { opacity: 0; transform: translateY(10px); transition: all .6s ease; }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-bg::before, .hero-bg::after { animation: none !important; }
+      .reveal { transition: none !important; }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-white text-slate-900">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-navy to-trust flex items-center justify-center shadow">
+          <i class="fa-solid fa-bolt text-white"></i>
+        </div>
+        <div>
+          <div class="font-black tracking-tight leading-tight">Levtech Direct</div>
+          <div class="text-xs text-slate-500 -mt-0.5">Future Career Blueprint（未来のキャリア設計図）</div>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm font-bold text-slate-600">
+        <a href="#gap" class="hover:text-slate-900">ギャップ</a>
+        <a href="#links" class="hover:text-slate-900">不足要素</a>
+        <a href="#sim" class="hover:text-slate-900">シミュレーション</a>
+        <a href="#jobs" class="hover:text-slate-900">推奨求人</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <button id="btnOpenHub"
+          class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-extrabold">
+          <i class="fa-solid fa-layer-group"></i>
+          Demo Hubへ
+        </button>
+        <button id="btnCTA"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-trust text-white font-extrabold shadow hover:brightness-110 transition">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          設計図を生成
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="gap" class="hero-bg text-white">
+    <div class="max-w-6xl mx-auto px-4 py-12 md:py-16 relative">
+      <div class="grid lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-6">
+          <div class="inline-flex items-center gap-2 text-xs font-extrabold px-3 py-1.5 rounded-full border border-white/20 bg-white/10">
+            <span class="w-2 h-2 rounded-full bg-cyan"></span>
+            デモ：キャリアの未来をシミュレーション
+          </div>
+
+          <h1 class="mt-4 text-3xl md:text-5xl font-black tracking-tight leading-tight">
+            あなたのキャリアは、<br/>
+            <span class="text-cyan">ここから加速する。</span>
+          </h1>
+
+          <p class="mt-4 text-white/80 leading-relaxed">
+            「年収」「役割」「商流」「技術」「希少性」。<br class="hidden sm:block"/>
+            次の一手を、“求人”ではなく <span class="font-extrabold text-premium">経験</span>から逆算して提示します。
+          </p>
+
+          <!-- Salary cards -->
+          <div class="mt-7 grid sm:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-white/8 border border-white/15 p-5 shadow-glow">
+              <div class="text-sm font-extrabold text-white/80 flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-cyan"></i> 現在の年収
+              </div>
+              <div class="mt-2 text-3xl font-black tracking-tight">550〜650<span class="text-base font-bold">万</span></div>
+              <div class="mt-2 text-xs text-white/70">
+                バックエンド5年 / 受託中心 / 設計権限が限定
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-white/10 border border-premium/40 p-5 shadow-gold gold-ring">
+              <div class="text-sm font-extrabold text-white/85 flex items-center gap-2">
+                <i class="fa-solid fa-crown text-premium"></i> 理想の未来
+              </div>
+              <div class="mt-2 text-4xl font-black tracking-tight text-premium">1000〜1200<span class="text-base font-bold text-white/85">万</span></div>
+              <div class="mt-2 text-xs text-white/70">
+                自社開発 × 技術選定 × リード/EM で市場価値を最大化
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-2 text-xs font-bold">
+            <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15">
+              <i class="fa-solid fa-shield-halved text-cyan mr-1"></i> 信頼できる提案根拠
+            </span>
+            <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15">
+              <i class="fa-solid fa-sparkles text-premium mr-1"></i> 未来の選択肢を可視化
+            </span>
+            <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15">
+              <i class="fa-solid fa-route text-white mr-1"></i> 最短ルートを設計
+            </span>
+          </div>
+        </div>
+
+        <!-- Radar -->
+        <div class="lg:col-span-6">
+          <div class="rounded-3xl bg-white/8 border border-white/15 p-5 md:p-6 shadow-glow">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-sm font-extrabold text-white/85">ギャップ可視化（5軸）</div>
+                <div class="text-xs text-white/70 mt-1">
+                  「現在（青）」と「理想（ゴールド）」の差分から、埋めるべき“経験”を抽出
+                </div>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-bold">
+                <span class="inline-flex items-center gap-2"><span class="w-2.5 h-2.5 rounded bg-trust"></span> 現在</span>
+                <span class="inline-flex items-center gap-2"><span class="w-2.5 h-2.5 rounded bg-premium"></span> 理想</span>
+              </div>
+            </div>
+
+            <div class="mt-4 bg-white/5 rounded-2xl border border-white/10 p-3">
+              <canvas id="radar" height="240"></canvas>
+            </div>
+
+            <div class="mt-4 grid sm:grid-cols-2 gap-3 text-xs">
+              <div class="rounded-xl bg-white/6 border border-white/10 p-3">
+                <div class="font-extrabold text-white/85 flex items-center gap-2">
+                  <i class="fa-solid fa-magnifying-glass text-cyan"></i> 主要ギャップ
+                </div>
+                <ul class="mt-2 space-y-1 text-white/75">
+                  <li>• 技術選定・設計の意思決定</li>
+                  <li>• 自社開発/元請けでの裁量</li>
+                  <li>• チームリード/マネジメント</li>
+                </ul>
+              </div>
+              <div class="rounded-xl bg-white/6 border border-white/10 p-3">
+                <div class="font-extrabold text-white/85 flex items-center gap-2">
+                  <i class="fa-solid fa-arrow-trend-up text-premium"></i> 伸びしろ
+                </div>
+                <ul class="mt-2 space-y-1 text-white/75">
+                  <li>• Go × AWS で需要が高い領域へ</li>
+                  <li>• 技術戦略の経験が年収に直結</li>
+                  <li>• VPoE/EM が視野に入る</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button id="btnStep1"
+                class="px-4 py-2 rounded-xl bg-premium text-ink font-extrabold shadow hover:brightness-110 transition">
+                <i class="fa-solid fa-diagram-project mr-2"></i> 不足要素を見る
+              </button>
+              <button id="btnStep2"
+                class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 font-extrabold hover:bg-white/15 transition">
+                <i class="fa-solid fa-code-branch mr-2"></i> 未来比較へ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Missing Links -->
+  <section id="links" class="py-12 md:py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="reveal">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <div class="text-sm font-extrabold text-trust">Missing Links</div>
+            <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight">理想に到達するために足りない3つの要素</h2>
+            <p class="mt-3 text-slate-600 leading-relaxed">
+              “やること”ではなく <span class="font-extrabold text-slate-900">獲得すべき経験</span>に翻訳して提示します。
+            </p>
+          </div>
+          <div class="hidden md:flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span class="w-2 h-2 rounded-full bg-cyan"></span>信頼性
+            <span class="w-2 h-2 rounded-full bg-premium"></span>未来の伸び
+          </div>
+        </div>
+
+        <div class="mt-8 grid md:grid-cols-3 gap-5">
+          <!-- Card 1 -->
+          <div class="rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-glow transition bg-white">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-xl bg-trust/10 text-trust flex items-center justify-center">
+                <i class="fa-solid fa-sitemap"></i>
+              </div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700">
+                GAP：商流 / 裁量
+              </span>
+            </div>
+            <h3 class="mt-4 font-black text-lg">自社開発・元請けでの裁量</h3>
+            <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+              要件定義〜運用までの意思決定が、年収レンジを押し上げます。
+            </p>
+
+            <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-4">
+              <div class="text-xs font-extrabold text-slate-700">獲得すべき経験</div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold">元請け/自社での開発プロセス</span>
+                <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold">要件整理・仕様策定</span>
+                <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold">運用改善（SLO/監視）</span>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="text-xs font-bold text-slate-500">期待できる年収インパクト</div>
+              <div class="mt-1 font-black text-trust">+200〜300万</div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-glow transition bg-white">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-xl bg-cyan/10 text-cyan flex items-center justify-center">
+                <i class="fa-solid fa-cloud"></i>
+              </div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700">
+                GAP：技術 / 需要
+              </span>
+            </div>
+            <h3 class="mt-4 font-black text-lg">Go × AWSで“需要の高い領域”へ</h3>
+            <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+              モダン言語＋クラウド基盤の経験は、職種横断で通用する武器になります。
+            </p>
+
+            <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-4">
+              <div class="text-xs font-extrabold text-slate-700">獲得すべき経験</div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold">Go（API/バッチ）</span>
+                <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold">AWS（ECS/EKS/IaC）</span>
+                <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold">パフォーマンス改善</span>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="text-xs font-bold text-slate-500">期待できる年収インパクト</div>
+              <div class="mt-1 font-black text-trust">+150〜200万</div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-glow transition bg-white">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-xl bg-premium/20 text-amber-700 flex items-center justify-center">
+                <i class="fa-solid fa-people-group"></i>
+              </div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800">
+                GAP：役割 / 希少性
+              </span>
+            </div>
+            <h3 class="mt-4 font-black text-lg">テックリード→EMへの役割拡張</h3>
+            <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+              「個人の強さ」から「組織の成果」に広げることで、希少性が跳ね上がります。
+            </p>
+
+            <div class="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4">
+              <div class="text-xs font-extrabold text-amber-800">獲得すべき経験</div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span class="px-2.5 py-1 rounded-full bg-white border border-amber-200 text-xs font-bold">設計レビューの主導</span>
+                <span class="px-2.5 py-1 rounded-full bg-white border border-amber-200 text-xs font-bold">育成/1on1</span>
+                <span class="px-2.5 py-1 rounded-full bg-white border border-amber-200 text-xs font-bold">技術戦略・ロードマップ</span>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="text-xs font-bold text-slate-500">期待できる年収インパクト</div>
+              <div class="mt-1 font-black text-amber-700">+250〜350万</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <button id="btnToSim"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-navy text-white font-extrabold shadow hover:brightness-110 transition">
+            <i class="fa-solid fa-forward"></i> 未来比較（シミュレーション）へ
+          </button>
+          <button id="btnToJobs"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-extrabold">
+            <i class="fa-solid fa-briefcase"></i> 推奨求人を見る
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Simulation / Comparison Timeline -->
+  <section id="sim" class="py-12 md:py-16 bg-slate-50 border-y border-slate-200">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="reveal">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <div class="text-sm font-extrabold text-trust">Simulation</div>
+            <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight">現状維持 vs 挑戦：未来の分岐を比較</h2>
+            <p class="mt-3 text-slate-600 leading-relaxed">
+              “よくある停滞”と“伸びる選択”を並べ、意思決定をクリアにします。
+            </p>
+          </div>
+          <div class="hidden md:flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200">比較：5年スパン</span>
+          </div>
+        </div>
+
+        <div class="mt-8 grid lg:grid-cols-2 gap-6">
+          <!-- Stay -->
+          <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
+                  <i class="fa-solid fa-pause"></i>
+                </span>
+                <div>
+                  <div class="font-black">現状維持の未来</div>
+                  <div class="text-xs text-slate-500">停滞 / 伸びが鈍い</div>
+                </div>
+              </div>
+              <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700">
+                5年後：800万前後
+              </span>
+            </div>
+
+            <div class="mt-5 space-y-4">
+              <!-- item -->
+              <div class="flex gap-3">
+                <div class="pt-1">
+                  <div class="w-3 h-3 rounded-full bg-slate-400"></div>
+                  <div class="w-px h-10 bg-slate-200 mx-auto"></div>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-slate-500">1年目</div>
+                  <div class="font-extrabold">受託の実装中心のまま</div>
+                  <div class="text-sm text-slate-600">技術選定なし / 要件定義の経験が薄い</div>
+                  <div class="mt-2 text-sm font-black text-slate-800">年収：700〜750万</div>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="pt-1">
+                  <div class="w-3 h-3 rounded-full bg-slate-400"></div>
+                  <div class="w-px h-10 bg-slate-200 mx-auto"></div>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-slate-500">3年目</div>
+                  <div class="font-extrabold">同一スタックで需要が頭打ち</div>
+                  <div class="text-sm text-slate-600">クラウド/モダン言語の経験が不足</div>
+                  <div class="mt-2 text-sm font-black text-slate-800">年収：760〜800万</div>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="pt-1">
+                  <div class="w-3 h-3 rounded-full bg-slate-400"></div>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-slate-500">5年目</div>
+                  <div class="font-extrabold">“保守・改善”中心に寄る</div>
+                  <div class="text-sm text-slate-600">役割の伸びが限定 / マネジメント機会なし</div>
+                  <div class="mt-2 text-sm font-black text-slate-800">年収：800〜850万</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4">
+              <div class="text-xs font-extrabold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-slate-600"></i> リスク
+              </div>
+              <ul class="mt-2 text-sm text-slate-600 space-y-1">
+                <li>• 「技術選定」「裁量」が増えず、市場価値が伸びにくい</li>
+                <li>• 年収の上限が見えやすくなる</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Challenge -->
+          <div class="rounded-3xl bg-white border border-amber-200 p-6 shadow-gold gold-ring">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-800">
+                  <i class="fa-solid fa-rocket"></i>
+                </span>
+                <div>
+                  <div class="font-black">挑戦した未来</div>
+                  <div class="text-xs text-slate-500">右肩上がり / 希少性UP</div>
+                </div>
+              </div>
+              <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800">
+                5年後：1200万+
+              </span>
+            </div>
+
+            <div class="mt-5 space-y-4">
+              <div class="flex gap-3">
+                <div class="pt-1">
+                  <div class="w-3 h-3 rounded-full bg-premium"></div>
+                  <div class="w-px h-10 bg-amber-200 mx-auto"></div>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-amber-800">0〜6ヶ月</div>
+                  <div class="font-extrabold">AWS認定（SAA）＋ Goの実務準備</div>
+                  <div class="text-sm text-slate-600">学習→小規模導入提案で“経験”に変換</div>
+                  <div class="mt-2 text-sm font-black text-amber-800">年収：800〜900万レンジへ</div>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="pt-1">
+                  <div class="w-3 h-3 rounded-full bg-premium"></div>
+                  <div class="w-px h-10 bg-amber-200 mx-auto"></div>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-amber-800">1年目</div>
+                  <div class="font-extrabold">自社開発へ転職（技術選定の裁量獲得）</div>
+                  <div class="text-sm text-slate-600">設計レビュー主導 / パフォーマンス改善</div>
+                  <div class="mt-2 text-sm font-black text-amber-800">年収：900〜1100万</div>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="pt-1">
+                  <div class="w-3 h-3 rounded-full bg-premium"></div>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-amber-800">3〜5年目</div>
+                  <div class="font-extrabold">テックリード → EM / VPoE が視野</div>
+                  <div class="text-sm text-slate-600">育成・戦略・組織成果で希少性が跳ねる</div>
+                  <div class="mt-2 text-sm font-black text-amber-800">年収：1200万+</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <div class="text-xs font-extrabold text-amber-800 flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> ワクワク要素
+              </div>
+              <ul class="mt-2 text-sm text-slate-700 space-y-1">
+                <li>• 「技術選定」×「裁量」×「役割拡張」で跳ねる</li>
+                <li>• VPoE / 年収1200万 / 技術戦略の中心へ</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step tabs -->
+        <div class="mt-10 flex flex-col md:flex-row gap-3">
+          <button data-step="1" class="stepBtn flex-1 px-5 py-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-left">
+            <div class="text-xs font-extrabold text-slate-500">STEP 1</div>
+            <div class="mt-1 font-black">ギャップ分析</div>
+            <div class="mt-1 text-sm text-slate-600">不足を“経験”へ翻訳する</div>
+          </button>
+          <button data-step="2" class="stepBtn flex-1 px-5 py-4 rounded-2xl border border-amber-200 bg-amber-50 hover:brightness-105 text-left gold-ring">
+            <div class="text-xs font-extrabold text-amber-800">STEP 2</div>
+            <div class="mt-1 font-black">分岐比較</div>
+            <div class="mt-1 text-sm text-slate-700">停滞と成功の違いを見る</div>
+          </button>
+          <button data-step="3" class="stepBtn flex-1 px-5 py-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-left">
+            <div class="text-xs font-extrabold text-slate-500">STEP 3</div>
+            <div class="mt-1 font-black">アクション設計</div>
+            <div class="mt-1 text-sm text-slate-600">今日からやることを確定</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Action Plan -->
+  <section class="py-12 md:py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="reveal">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <div class="text-sm font-extrabold text-trust">Action Plan</div>
+            <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight">あなた専用のアクションプラン</h2>
+            <p class="mt-3 text-slate-600 leading-relaxed">
+              成功パターンから逆算して、<span class="font-extrabold text-slate-900">確実に年収を押し上げる順</span>に並べます。
+            </p>
+          </div>
+          <div class="hidden md:flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">目標：EM / 年収1200万+</span>
+          </div>
+        </div>
+
+        <!-- Roadmap -->
+        <div class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="text-sm font-extrabold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-route text-trust"></i> キャリアロードマップ
+          </div>
+
+          <div class="mt-5 grid md:grid-cols-3 gap-4">
+            <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+              <div class="text-xs font-extrabold text-slate-500">現在</div>
+              <div class="mt-1 font-black">シニアバックエンド</div>
+              <div class="mt-2 text-sm text-slate-600">受託中心 / 実装主担当</div>
+              <div class="mt-3 text-xl font-black text-trust">550〜650万</div>
+            </div>
+
+            <div class="rounded-2xl border border-amber-200 p-5 bg-amber-50 gold-ring">
+              <div class="text-xs font-extrabold text-amber-800">次のステップ（6〜12ヶ月）</div>
+              <div class="mt-1 font-black">テックリード</div>
+              <div class="mt-2 text-sm text-slate-700">設計レビュー主導 / 技術選定の裁量</div>
+              <div class="mt-3 text-xl font-black text-amber-800">900〜1000万</div>
+            </div>
+
+            <div class="rounded-2xl border border-amber-200 p-5 bg-white shadow-gold">
+              <div class="text-xs font-extrabold text-amber-800">目標（1〜2年）</div>
+              <div class="mt-1 font-black">EM / VPoE</div>
+              <div class="mt-2 text-sm text-slate-700">組織成果 / 技術戦略 / 育成</div>
+              <div class="mt-3 text-xl font-black text-premium">1200万+</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-6 grid lg:grid-cols-2 gap-6">
+          <div class="rounded-3xl border border-amber-200 bg-amber-50 p-6 gold-ring">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-premium text-ink">最優先</span>
+              <span class="text-xs font-bold text-amber-800"><i class="fa-solid fa-clock mr-1"></i> 3ヶ月以内</span>
+            </div>
+            <div class="mt-3 text-lg font-black">AWS認定（SAA）取得</div>
+            <div class="mt-2 text-sm text-slate-700">
+              需要が高いクラウド基盤の“証明”を作り、転職先の選択肢を増やす。
+            </div>
+            <div class="mt-4 rounded-2xl bg-white/70 border border-amber-200 p-4">
+              <div class="text-xs font-extrabold text-amber-900">期待効果</div>
+              <div class="mt-1 text-sm text-slate-700">クラウド基盤経験の入口 → 年収レンジを上げやすい</div>
+              <div class="mt-2 font-black text-amber-800">+100万 期待値</div>
+              <div class="mt-3 text-xs font-bold text-slate-600">具体ステップ</div>
+              <div class="mt-1 text-sm text-slate-700">Udemy（週5h）→ ハンズオン → 受験</div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-100 border border-slate-200">最優先</span>
+              <span class="text-xs font-bold text-slate-500"><i class="fa-solid fa-clock mr-1"></i> 6ヶ月以内</span>
+            </div>
+            <div class="mt-3 text-lg font-black">Go言語を実務レベルへ</div>
+            <div class="mt-2 text-sm text-slate-600">
+              “需要の高い言語”で、SaaS/自社開発の選択肢と年収レンジを一気に広げる。
+            </div>
+            <div class="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4">
+              <div class="text-xs font-extrabold text-slate-700">期待効果</div>
+              <div class="mt-1 text-sm text-slate-600">Go × API設計 × 運用改善が強い武器に</div>
+              <div class="mt-2 font-black text-trust">+150万 期待値</div>
+              <div class="mt-3 text-xs font-bold text-slate-500">具体ステップ</div>
+              <div class="mt-1 text-sm text-slate-700">公式チュートリアル → 個人PJ → 業務で小規模導入提案</div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-100 border border-slate-200">優先</span>
+              <span class="text-xs font-bold text-slate-500"><i class="fa-solid fa-clock mr-1"></i> 1年以内</span>
+            </div>
+            <div class="mt-3 text-lg font-black">自社開発・元請けへ転職</div>
+            <div class="mt-2 text-sm text-slate-600">
+              “商流”は年収の天井を決めがち。裁量を獲得するのが最重要。
+            </div>
+            <div class="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4">
+              <div class="text-xs font-extrabold text-slate-700">期待効果</div>
+              <div class="mt-1 text-sm text-slate-600">要件整理/技術選定/運用改善の経験が積める</div>
+              <div class="mt-2 font-black text-trust">+200〜300万 期待値</div>
+              <div class="mt-3 text-xs font-bold text-slate-500">見るべき条件</div>
+              <div class="mt-1 text-sm text-slate-700">技術選定権限 / 設計レビュー文化 / SLO運用</div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-amber-200 bg-white p-6 shadow-gold gold-ring">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800">重要</span>
+              <span class="text-xs font-bold text-amber-800"><i class="fa-solid fa-clock mr-1"></i> 1〜2年</span>
+            </div>
+            <div class="mt-3 text-lg font-black">設計・技術戦略＋育成（EM準備）</div>
+            <div class="mt-2 text-sm text-slate-700">
+              「個人貢献」から「組織成果」に移ると、希少性が上がり年収1200万が現実になる。
+            </div>
+            <div class="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <div class="text-xs font-extrabold text-amber-800">期待効果</div>
+              <div class="mt-1 text-sm text-slate-700">テックリード→EM→VPoE の階段を登れる</div>
+              <div class="mt-2 font-black text-premium">+250〜350万 期待値</div>
+              <div class="mt-3 text-xs font-bold text-amber-800">具体ステップ</div>
+              <div class="mt-1 text-sm text-slate-700">レビュー主導 → 1on1 → ロードマップ設計 → 採用協力</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <button id="btnScrollJobs"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-trust text-white font-extrabold shadow hover:brightness-110 transition">
+            <i class="fa-solid fa-briefcase"></i> GAPを埋める求人を見る
+          </button>
+          <button id="btnScrollTop"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-extrabold">
+            <i class="fa-solid fa-arrow-up"></i> 上へ戻る
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Job Recommendation -->
+  <section id="jobs" class="py-12 md:py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="reveal">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <div class="text-sm font-extrabold text-trust">Job Recommendation</div>
+            <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight">あなたのGAPを埋める求人</h2>
+            <p class="mt-3 text-slate-600 leading-relaxed">
+              通常の求人票ではなく、<span class="font-extrabold text-slate-900">「得られる経験（Missing Link）」</span>を前面に。
+            </p>
+          </div>
+          <div class="hidden md:flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">デモ：3件</span>
+          </div>
+        </div>
+
+        <div class="mt-8 grid lg:grid-cols-3 gap-5">
+          <!-- Job 1 -->
+          <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-glow transition">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-trust/10 text-trust flex items-center justify-center">
+                <i class="fa-solid fa-building"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500 font-bold">マッチ度</div>
+                <div class="mt-1 inline-flex items-center gap-2">
+                  <span class="w-9 h-9 rounded-2xl bg-gradient-to-br from-trust to-navy text-white font-black flex items-center justify-center">82%</span>
+                  <span class="text-xs font-extrabold text-slate-700">最短で伸びる</span>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="mt-4 font-black text-lg leading-snug">BtoB SaaS｜バックエンド（Go）</h3>
+            <p class="mt-2 text-sm text-slate-600">成長中SaaS｜自社開発｜設計・技術選定に参加</p>
+
+            <div class="mt-4">
+              <div class="text-xs font-extrabold text-slate-700">この求人で得られる経験（Missing Link）</div>
+              <ul class="mt-2 space-y-1.5 text-sm text-slate-700">
+                <li class="flex gap-2"><i class="fa-solid fa-link text-cyan mt-1"></i> GoでのAPI設計 / DB設計</li>
+                <li class="flex gap-2"><i class="fa-solid fa-link text-cyan mt-1"></i> AWS（ECS/IaC）運用改善</li>
+                <li class="flex gap-2"><i class="fa-solid fa-link text-cyan mt-1"></i> 設計レビュー主導の経験</li>
+              </ul>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold">Go</span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold">AWS</span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold">技術選定</span>
+            </div>
+
+            <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <div class="text-xs font-extrabold text-amber-800">年収レンジ</div>
+              <div class="mt-1 text-xl font-black text-amber-800">800〜1100万</div>
+            </div>
+
+            <button class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-trust text-white font-extrabold hover:brightness-110 transition">
+              <i class="fa-solid fa-arrow-right"></i> 詳細を見る
+            </button>
+          </article>
+
+          <!-- Job 2 -->
+          <article class="rounded-3xl border border-amber-200 bg-white p-6 shadow-gold gold-ring hover:brightness-[1.01] transition">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center">
+                <i class="fa-solid fa-crown"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500 font-bold">マッチ度</div>
+                <div class="mt-1 inline-flex items-center gap-2">
+                  <span class="w-9 h-9 rounded-2xl bg-premium text-ink font-black flex items-center justify-center">76%</span>
+                  <span class="text-xs font-extrabold text-amber-800">ハイリターン</span>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="mt-4 font-black text-lg leading-snug">Fintech｜テックリード候補</h3>
+            <p class="mt-2 text-sm text-slate-700">自社開発｜技術戦略・ロードマップに参加</p>
+
+            <div class="mt-4">
+              <div class="text-xs font-extrabold text-amber-800">この求人で得られる経験（Missing Link）</div>
+              <ul class="mt-2 space-y-1.5 text-sm text-slate-700">
+                <li class="flex gap-2"><i class="fa-solid fa-link text-premium mt-1"></i> 技術選定・アーキ設計の主導</li>
+                <li class="flex gap-2"><i class="fa-solid fa-link text-premium mt-1"></i> チーム育成（1on1/レビュー）</li>
+                <li class="flex gap-2"><i class="fa-solid fa-link text-premium mt-1"></i> 事業KPIと技術の接続</li>
+              </ul>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">Tech Lead</span>
+              <span class="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">設計権限</span>
+              <span class="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">育成</span>
+            </div>
+
+            <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <div class="text-xs font-extrabold text-amber-800">年収レンジ</div>
+              <div class="mt-1 text-xl font-black text-premium">950〜1200万</div>
+            </div>
+
+            <button class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-ink text-white font-extrabold hover:brightness-110 transition">
+              <i class="fa-solid fa-arrow-right"></i> 詳細を見る
+            </button>
+          </article>
+
+          <!-- Job 3 -->
+          <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-glow transition">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-cyan/10 text-cyan flex items-center justify-center">
+                <i class="fa-solid fa-cloud-bolt"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500 font-bold">マッチ度</div>
+                <div class="mt-1 inline-flex items-center gap-2">
+                  <span class="w-9 h-9 rounded-2xl bg-cyan text-ink font-black flex items-center justify-center">71%</span>
+                  <span class="text-xs font-extrabold text-slate-700">スキル拡張</span>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="mt-4 font-black text-lg leading-snug">SRE寄り｜クラウド基盤エンジニア</h3>
+            <p class="mt-2 text-sm text-slate-600">自社開発｜運用改善で希少性UP</p>
+
+            <div class="mt-4">
+              <div class="text-xs font-extrabold text-slate-700">この求人で得られる経験（Missing Link）</div>
+              <ul class="mt-2 space-y-1.5 text-sm text-slate-700">
+                <li class="flex gap-2"><i class="fa-solid fa-link text-cyan mt-1"></i> SLO/監視/インシデント対応</li>
+                <li class="flex gap-2"><i class="fa-solid fa-link text-cyan mt-1"></i> IaC（Terraform）での標準化</li>
+                <li class="flex gap-2"><i class="fa-solid fa-link text-cyan mt-1"></i> 性能・コスト最適化</li>
+              </ul>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold">SRE</span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold">Terraform</span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold">SLO</span>
+            </div>
+
+            <div class="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4">
+              <div class="text-xs font-extrabold text-slate-700">年収レンジ</div>
+              <div class="mt-1 text-xl font-black text-trust">780〜1050万</div>
+            </div>
+
+            <button class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-extrabold">
+              <i class="fa-solid fa-arrow-right"></i> 詳細を見る
+            </button>
+          </article>
+        </div>
+
+        <!-- Footer CTA -->
+        <div class="mt-10 rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-8">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <div class="text-sm font-extrabold text-trust">次の一手を、今日決める</div>
+              <div class="mt-2 text-2xl font-black tracking-tight">
+                “未来のキャリア設計図” をもとに、<br class="hidden sm:block"/>
+                最短ルートで年収1200万へ。
+              </div>
+              <div class="mt-3 text-slate-600">
+                デモはサンプルですが、体験の核は「経験の逆算」です。
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button id="btnCTA2" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-navy text-white font-extrabold shadow hover:brightness-110 transition">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 設計図を生成（デモ）
+              </button>
+              <button id="btnCopyShare" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-extrabold">
+                <i class="fa-solid fa-link"></i> 共有リンクをコピー
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <footer class="mt-8 text-xs text-slate-500">
+          © Levtech Direct Demo — Future Career Blueprint. (Demo UI / Not production)
+        </footer>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
+        <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div class="font-black flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-trust"></i>
+            Future Career Blueprint（デモ）
+          </div>
+          <button id="modalClose" class="w-10 h-10 rounded-xl hover:bg-white border border-transparent hover:border-slate-200 transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5">
+          <div class="text-sm font-extrabold text-slate-700">このデモで伝えたいこと</div>
+          <ul class="mt-3 space-y-2 text-sm text-slate-700">
+            <li class="flex gap-2"><i class="fa-solid fa-check text-cyan mt-1"></i> 求人ではなく「得られる経験」を中心に提案する</li>
+            <li class="flex gap-2"><i class="fa-solid fa-check text-cyan mt-1"></i> ギャップを“具体的スキル/役割”に翻訳する</li>
+            <li class="flex gap-2"><i class="fa-solid fa-check text-cyan mt-1"></i> 現状維持と挑戦の未来を並べて意思決定を促す</li>
+          </ul>
+
+          <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <div class="text-xs font-extrabold text-amber-800">次に見せたい演出（提案）</div>
+            <div class="mt-2 text-sm text-slate-700">
+              入力フォーム（職種/年収/経験/志向）→ 即時にレーダーと求人が変わる “リアルタイム設計図”。
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-col sm:flex-row gap-3">
+            <button id="modalGoJobs" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-trust text-white font-extrabold hover:brightness-110 transition">
+              <i class="fa-solid fa-briefcase"></i> 推奨求人へ
+            </button>
+            <button id="modalClose2" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-extrabold">
+              <i class="fa-solid fa-check"></i> OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Demo Hub button: tries to go to "../" hub or root index ---
+    (function(){
+      const btn = document.getElementById('btnOpenHub');
+      if(!btn) return;
+      btn.addEventListener('click', () => {
+        // If v1.html is opened, go to repo root (./) which resolves to index.html if exists
+        const u = new URL(location.href);
+        // remove filename
+        const base = u.href.replace(/[^\/]+$/, '');
+        // If current is /v1.html -> base is / ; project pages will have /repo/
+        // navigate to directory root (same folder) which should hit index.html
+        location.href = base;
+      });
+    })();
+
+    // --- Smooth scroll helper ---
+    function scrollToId(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // --- Reveal on scroll ---
+    (function(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting) e.target.classList.add('on');
+        });
+      }, { threshold: 0.12 });
+      els.forEach(el=>io.observe(el));
+    })();
+
+    // --- Buttons ---
+    document.getElementById('btnStep1')?.addEventListener('click', ()=>scrollToId('links'));
+    document.getElementById('btnStep2')?.addEventListener('click', ()=>scrollToId('sim'));
+    document.getElementById('btnToSim')?.addEventListener('click', ()=>scrollToId('sim'));
+    document.getElementById('btnToJobs')?.addEventListener('click', ()=>scrollToId('jobs'));
+    document.getElementById('btnScrollJobs')?.addEventListener('click', ()=>scrollToId('jobs'));
+    document.getElementById('btnScrollTop')?.addEventListener('click', ()=>scrollToId('gap'));
+    document.getElementById('btnCTA')?.addEventListener('click', openModal);
+    document.getElementById('btnCTA2')?.addEventListener('click', openModal);
+
+    // --- Modal ---
+    const modal = document.getElementById('modal');
+    function openModal(){ modal?.classList.remove('hidden'); }
+    function closeModal(){ modal?.classList.add('hidden'); }
+    document.getElementById('modalClose')?.addEventListener('click', closeModal);
+    document.getElementById('modalClose2')?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e)=>{
+      if(e.target === modal.firstElementChild) closeModal();
+    });
+    document.getElementById('modalGoJobs')?.addEventListener('click', ()=>{
+      closeModal(); setTimeout(()=>scrollToId('jobs'), 180);
+    });
+
+    // --- Share link copy ---
+    document.getElementById('btnCopyShare')?.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(location.href);
+        toast('共有リンクをコピーしました');
+      }catch(e){
+        toast('コピーに失敗しました（ブラウザ権限を確認）');
+      }
+    });
+
+    // --- Tiny toast ---
+    function toast(msg){
+      const t = document.createElement('div');
+      t.className = "fixed left-1/2 -translate-x-1/2 bottom-6 z-[70] px-4 py-3 rounded-2xl bg-ink text-white text-sm font-extrabold shadow-2xl border border-white/10";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity = "0"; t.style.transition = "opacity .35s ease"; }, 1400);
+      setTimeout(()=>t.remove(), 1900);
+    }
+
+    // --- Radar Chart (Chart.js) ---
+    (function(){
+      const ctx = document.getElementById('radar');
+      if(!ctx) return;
+
+      // レーダーはデモ上“相対”だが、説明は具体的スキル/役割に紐づけ済み
+      const labels = ["技術", "役割", "商流", "ビジネス貢献", "希少性"];
+
+      const data = {
+        labels,
+        datasets: [
+          {
+            label: "現在のあなた",
+            data: [55, 45, 40, 45, 40],
+            borderColor: "rgba(37, 99, 235, 1)",
+            backgroundColor: "rgba(37, 99, 235, .22)",
+            pointBackgroundColor: "rgba(37, 99, 235, 1)",
+            pointRadius: 3,
+            borderWidth: 2
+          },
+          {
+            label: "理想の未来",
+            data: [85, 80, 82, 78, 86],
+            borderColor: "rgba(255, 215, 0, 1)",
+            backgroundColor: "rgba(255, 215, 0, .16)",
+            pointBackgroundColor: "rgba(255, 215, 0, 1)",
+            pointRadius: 3,
+            borderWidth: 2
+          }
+        ]
+      };
+
+      // glow effect for gold line (plugin)
+      const glowPlugin = {
+        id: 'glowPlugin',
+        beforeDatasetsDraw(chart){
+          const {ctx} = chart;
+          ctx.save();
+          ctx.shadowColor = "rgba(255, 215, 0, .35)";
+          ctx.shadowBlur = 18;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        },
+        afterDatasetsDraw(chart){
+          chart.ctx.restore();
+        }
+      };
+
+      new Chart(ctx, {
+        type: 'radar',
+        data,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => `${c.dataset.label}：到達状態の目安`
+              }
+            }
+          },
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 100,
+              ticks: { display: false },
+              grid: { color: "rgba(255,255,255,.10)" },
+              angleLines: { color: "rgba(255,255,255,.10)" },
+              pointLabels: {
+                color: "rgba(255,255,255,.85)",
+                font: { size: 12, weight: '700' }
+              }
+            }
+          }
+        },
+        plugins: [glowPlugin]
+      });
+    })();
+  </script>
+</body>
+</html>
