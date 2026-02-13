@@ -1,0 +1,1645 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Future Resume Simulator V2（HTML単体デモ）</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+    // Tailwind config (optional)
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Noto Sans JP", "ui-sans-serif", "system-ui"] },
+          colors: {
+            levNavy: "#0033A0",
+            levNavyDeep: "#0f172a",
+            levBlue: "#0055CC",
+            levOrange: "#FF6B00",
+            levOrangeDeep: "#E65100",
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: "Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    /* Navbar - レバテック風 */
+    .navbar {
+      background: #0033A0;
+      box-shadow: 0 2px 8px rgba(0, 51, 160, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    .nav-steps {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .step-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.3);
+      color: rgba(255,255,255,.85);
+      padding: .5rem .9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .25s ease;
+      font-size: .875rem;
+      user-select: none;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.2);
+      font-weight: 800;
+      font-size: .8rem;
+      line-height: 1;
+    }
+
+    .step-btn:hover {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.55);
+      transform: translateY(-1px);
+    }
+
+    .step-btn.active {
+      background: #FF6B00;
+      border-color: #FF6B00;
+      color: white;
+      box-shadow: 0 8px 22px rgba(255, 107, 0, 0.25);
+    }
+
+    .step-btn.active .step-number { background: rgba(255,255,255,.28); }
+
+    /* Main Content */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all .5s ease;
+    }
+    .main-content.animate { opacity: 1; transform: translateY(0); }
+
+    /* Header Section */
+    .header-section { margin-bottom: 2rem; }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .875rem;
+      color: #666;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .breadcrumb .current { color: #0033A0; font-weight: 700; }
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0033A0;
+      margin-bottom: .75rem;
+      flex-wrap: wrap;
+    }
+    .page-title i { color: #0033A0; }
+    .page-description {
+      font-size: 1rem;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    /* Profile Summary */
+    .profile-summary {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      align-items: stretch;
+    }
+
+    .profile-card {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 24px rgba(0, 51, 160, 0.06);
+    }
+
+    .profile-card.target {
+      border-color: #FF6B00;
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.06), white);
+      box-shadow: 0 12px 28px rgba(255, 107, 0, 0.12);
+    }
+
+    .profile-card h3 {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 1.25rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .profile-details { display: flex; flex-direction: column; gap: 1rem; }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-row .label { font-size: .875rem; color: #666; }
+    .detail-row .value { font-weight: 700; color: #111827; text-align: right; }
+    .detail-row .highlight { color: #0033A0; font-size: 1.25rem; font-weight: 900; }
+    .detail-row .highlight-target { color: #FF6B00; font-size: 1.25rem; font-weight: 900; }
+
+    .arrow-between {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      color: #9aa3b2;
+      min-width: 150px;
+    }
+    .gap-amount {
+      font-size: .875rem;
+      font-weight: 800;
+      color: #FF6B00;
+      background: rgba(255, 107, 0, 0.10);
+      border: 1px solid rgba(255, 107, 0, 0.25);
+      padding: .35rem .6rem;
+      border-radius: 999px;
+    }
+
+    /* Gap Visualization */
+    .gap-visualization {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 24px rgba(0, 51, 160, 0.06);
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #0033A0;
+      margin-bottom: 2rem;
+    }
+
+    .gap-chart-container {
+      display: grid;
+      grid-template-columns: 500px 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .radar-section { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
+    .radar-wrap {
+      width: 100%;
+      height: 420px;
+      background: linear-gradient(180deg, rgba(0, 51, 160, 0.03), rgba(255,255,255,1));
+      border: 1px solid #eef2f7;
+      border-radius: 14px;
+      padding: 1rem;
+    }
+
+    .legend { display: flex; gap: 1.25rem; margin-top: .25rem; flex-wrap: wrap; justify-content: center; }
+    .legend-item { display: flex; align-items: center; gap: .5rem; font-size: .875rem; font-weight: 700; color: #334155; }
+    .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+    .legend-color.current { background: #0033A0; }
+    .legend-color.target { background: #FF6B00; box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.18); }
+
+    .gap-details { display: flex; flex-direction: column; gap: 1.25rem; }
+    .gap-detail-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      background: #fafafa;
+    }
+
+    .gap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .gap-header h4 { font-size: 1.125rem; color: #111827; font-weight: 900; }
+    .gap-badge {
+      background: #FFF3E0;
+      color: #FF6B00;
+      padding: .25rem .75rem;
+      border-radius: 999px;
+      font-size: .875rem;
+      font-weight: 900;
+      border: 1px solid rgba(255, 107, 0, 0.25);
+    }
+
+    .gap-comparison { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem; }
+    .comparison-item { display: flex; flex-direction: column; gap: .5rem; }
+    .comparison-item .label {
+      font-size: .75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 800;
+    }
+    .comparison-item .value { font-size: .9rem; color: #111827; font-weight: 800; }
+
+    .bar {
+      position: relative;
+      height: 32px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .bar .fill {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(90deg, #0033A0, #0055CC);
+      transition: width .6s ease;
+    }
+    .comparison-item.target .bar .fill { background: linear-gradient(90deg, #FF6B00, #FF8C33); }
+    .bar .score {
+      position: absolute;
+      right: .75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: .875rem;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,.25);
+    }
+
+    .impact-note {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .875rem;
+      color: #FF6B00;
+      font-weight: 900;
+    }
+
+    /* Career Pattern Comparison */
+    .similarity-badges {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .similarity-badge {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .75rem 1.25rem;
+      border-radius: 12px;
+      font-size: .875rem;
+      font-weight: 900;
+    }
+    .similarity-badge.success { background: #E8F5E9; color: #2E7D32; border: 1px solid rgba(46,125,50,.25); }
+    .similarity-badge.failure { background: #FFEBEE; color: #C62828; border: 1px solid rgba(198,40,40,.25); }
+
+    .three-way-comparison {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .career-column {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+    }
+    .career-column.success { border-color: #4CAF50; background: linear-gradient(180deg, rgba(76,175,80,.06), white); }
+    .career-column.you { border-color: #0033A0; background: linear-gradient(180deg, rgba(0,51,160,.06), white); }
+    .career-column.failure { border-color: #F44336; background: linear-gradient(180deg, rgba(244,67,54,.06), white); }
+
+    .column-header {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 1.25rem;
+    }
+    .column-header h3 {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: 1.05rem;
+      color: #111827;
+      font-weight: 900;
+    }
+
+    .result-badge {
+      padding: .25rem .75rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 900;
+      width: fit-content;
+    }
+    .result-badge.success { background: #4CAF50; color: white; }
+    .result-badge.neutral { background: #0033A0; color: white; }
+    .result-badge.failure { background: #F44336; color: white; }
+
+    .timeline { display: flex; flex-direction: column; }
+    .timeline-item { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+    .timeline-marker { position: relative; display: flex; flex-direction: column; align-items: center; }
+    .marker-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #0033A0;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #0033A0;
+      z-index: 1;
+    }
+    .timeline-marker.positive .marker-dot { background: #4CAF50; box-shadow: 0 0 0 2px #4CAF50; }
+    .timeline-marker.negative .marker-dot { background: #F44336; box-shadow: 0 0 0 2px #F44336; }
+    .timeline-marker.gap .marker-dot { background: #FF9800; box-shadow: 0 0 0 2px #FF9800; }
+
+    .marker-line {
+      width: 2px;
+      flex: 1;
+      background: linear-gradient(180deg, #0033A0, rgba(0,51,160,.3));
+      margin-top: .5rem;
+      border-radius: 999px;
+    }
+    .timeline-marker.positive .marker-line { background: linear-gradient(180deg, #4CAF50, rgba(76,175,80,.3)); }
+    .timeline-marker.negative .marker-line { background: linear-gradient(180deg, #F44336, rgba(244,67,54,.3)); }
+
+    .timeline-content { flex: 1; padding-bottom: .75rem; }
+    .year-label { font-size: .75rem; color: #64748b; font-weight: 900; margin-bottom: .4rem; }
+    .company-type-badge {
+      display: inline-block;
+      padding: .2rem .5rem;
+      border-radius: 8px;
+      font-size: .75rem;
+      font-weight: 900;
+      margin-bottom: .5rem;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+    .company-type-badge.success { background: #E8F5E9; color: #2E7D32; }
+    .company-type-badge.neutral { background: #E3F2FD; color: #1565C0; }
+    .company-type-badge.failure { background: #FFEBEE; color: #C62828; }
+
+    .company-name { font-size: .875rem; color: #64748b; margin-bottom: .2rem; font-weight: 700; }
+    .role-title { font-size: 1rem; font-weight: 900; color: #111827; margin-bottom: .45rem; }
+    .salary-tag {
+      display: inline-block;
+      padding: .25rem .75rem;
+      background: #0033A0;
+      color: white;
+      border-radius: 10px;
+      font-size: .875rem;
+      font-weight: 900;
+      margin-bottom: .75rem;
+      box-shadow: 0 10px 22px rgba(0,51,160,.18);
+    }
+    .responsibility { font-size: .875rem; color: #64748b; margin-bottom: .75rem; font-weight: 700; }
+
+    .skills { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .skill-tag {
+      padding: .25rem .5rem;
+      background: #f0f0f0;
+      border-radius: 10px;
+      font-size: .75rem;
+      color: #111827;
+      font-weight: 800;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .action-taken {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      padding: .75rem;
+      background: #E8F5E9;
+      border-left: 3px solid #4CAF50;
+      border-radius: 10px;
+      font-size: .875rem;
+      color: #2E7D32;
+      margin-top: .5rem;
+      font-weight: 800;
+    }
+
+    .gap-reasons {
+      padding: .75rem;
+      background: #FFF3E0;
+      border-left: 3px solid #FF9800;
+      border-radius: 10px;
+      margin-top: .5rem;
+    }
+    .gap-reasons.negative { background: #FFEBEE; border-left-color: #F44336; }
+
+    .reasons-list { display: flex; flex-direction: column; gap: .5rem; margin-top: .5rem; }
+    .reason-item { display: flex; align-items: flex-start; gap: .5rem; font-size: .75rem; color: #D84315; font-weight: 800; }
+    .gap-reasons.negative .reason-item { color: #C62828; }
+
+    /* Insights Section */
+    .insights-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 24px rgba(0, 51, 160, 0.06);
+    }
+    .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .insight-card { border-radius: 12px; padding: 1.5rem; border: 2px solid transparent; }
+    .insight-card.success { background: #E8F5E9; border-color: #4CAF50; }
+    .insight-card.failure { background: #FFEBEE; border-color: #F44336; }
+    .insight-card h4 { display: flex; align-items: center; gap: .5rem; font-size: 1.125rem; margin-bottom: 1rem; color: #111827; font-weight: 900; }
+    .insight-card ul { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+    .insight-card li { padding-left: 1.5rem; position: relative; font-size: .875rem; line-height: 1.7; font-weight: 700; color: #111827; }
+    .insight-card li::before { content: "•"; position: absolute; left: 0; font-weight: 900; }
+    .insight-card.success li::before { color: #4CAF50; }
+    .insight-card.failure li::before { color: #F44336; }
+
+    /* Action Plan */
+    .roadmap-overview {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 24px rgba(0, 51, 160, 0.06);
+    }
+    .roadmap-visual {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .roadmap-step { text-align: center; min-width: 180px; }
+    .step-marker { font-size: 3rem; margin-bottom: .5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,.1)); }
+    .step-content { display: flex; flex-direction: column; gap: .25rem; }
+    .step-label { font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .06em; font-weight: 900; }
+    .step-role { font-size: 1rem; font-weight: 900; color: #111827; }
+    .step-salary { font-size: 1.125rem; font-weight: 900; color: #FF6B00; }
+
+    .roadmap-arrow { display: flex; flex-direction: column; align-items: center; gap: .35rem; color: #94a3b8; min-width: 120px; }
+    .duration { font-size: .75rem; color: #64748b; font-weight: 900; }
+
+    .action-plan-list {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 24px rgba(0, 51, 160, 0.06);
+    }
+
+    .action-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: all .25s ease;
+      background: white;
+    }
+    .action-card:hover {
+      box-shadow: 0 12px 24px rgba(0, 51, 160, 0.10);
+      transform: translateY(-2px);
+    }
+    .action-card.priority-最優先 {
+      border-color: #FF6B00;
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.06), white);
+    }
+
+    .action-header { margin-bottom: 1rem; }
+    .action-meta { display: flex; gap: .75rem; flex-wrap: wrap; }
+
+    .priority-badge {
+      padding: .25rem .75rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+    .priority-badge.最優先 { background: #FF6B00; color: white; border-color: rgba(255,107,0,.45); }
+    .priority-badge.優先 { background: #FFB74D; color: white; border-color: rgba(255,183,77,.55); }
+    .priority-badge.重要 { background: #90CAF9; color: #0033A0; border-color: rgba(144,202,249,.7); }
+
+    .period-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .25rem .75rem;
+      background: #f0f0f0;
+      border-radius: 999px;
+      font-size: .75rem;
+      color: #475569;
+      font-weight: 900;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .action-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #0033A0;
+      margin-bottom: 1rem;
+    }
+
+    .action-body { display: flex; flex-direction: column; gap: 1rem; }
+    .why-important, .next-steps { font-size: .875rem; }
+    .why-important strong, .next-steps strong { display: block; margin-bottom: .5rem; color: #111827; font-weight: 900; }
+    .why-important p, .next-steps p { color: #475569; line-height: 1.75; font-weight: 700; }
+
+    .impact-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem;
+      background: #FFF3E0;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 107, 0, 0.2);
+      flex-wrap: wrap;
+    }
+    .impact-badge { display: flex; align-items: center; gap: .75rem; }
+    .impact-dimension { display: block; font-size: .75rem; color: #475569; font-weight: 900; }
+    .impact-point { display: block; font-size: 1.125rem; font-weight: 900; color: #FF6B00; }
+    .salary-impact { font-size: 1rem; font-weight: 900; color: #FF6B00; }
+
+    /* Recommended Jobs */
+    .recommended-jobs {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 24px rgba(0, 51, 160, 0.06);
+    }
+    .recommended-description { font-size: .875rem; color: #475569; margin-bottom: 1.25rem; font-weight: 700; }
+    .job-preview { margin-bottom: 1.25rem; }
+    .job-card {
+      display: flex;
+      gap: 1.5rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .match-rate { display: flex; flex-direction: column; align-items: center; gap: .5rem; min-width: 110px; }
+    .match-circle {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0033A0, #0055CC);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 900;
+      box-shadow: 0 14px 26px rgba(0, 51, 160, 0.25);
+    }
+    .match-rate span { font-size: .75rem; color: #475569; font-weight: 900; }
+
+    .job-info { flex: 1; min-width: 260px; }
+    .job-info h4 { font-size: 1.125rem; color: #0033A0; margin-bottom: .5rem; font-weight: 900; }
+    .company { font-size: .875rem; color: #475569; margin-bottom: .75rem; font-weight: 700; }
+    .job-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .tag {
+      padding: .25rem .75rem;
+      background: #E3F2FD;
+      color: #0033A0;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 900;
+      border: 1px solid rgba(21,101,192,.15);
+    }
+    .salary-range { font-size: 1.125rem; font-weight: 900; color: #FF6B00; }
+
+    .view-all-jobs {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: 1rem;
+      background: #FF6B00;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all .25s ease;
+      box-shadow: 0 14px 26px rgba(255, 107, 0, 0.22);
+    }
+    .view-all-jobs:hover {
+      background: #E65100;
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(255, 107, 0, 0.30);
+    }
+
+    /* Next Button */
+    .next-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .75rem;
+      width: 100%;
+      max-width: 520px;
+      margin: 2rem auto 0;
+      padding: 1rem 2rem;
+      background: #FF6B00;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all .25s ease;
+      box-shadow: 0 14px 26px rgba(255, 107, 0, 0.22);
+    }
+    .next-button:hover {
+      background: #E65100;
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(255, 107, 0, 0.30);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .gap-chart-container { grid-template-columns: 1fr; }
+      .three-way-comparison { grid-template-columns: 1fr; }
+      .insights-grid { grid-template-columns: 1fr; }
+      .profile-summary { grid-template-columns: 1fr; }
+      .arrow-between { transform: rotate(90deg); margin: 1rem 0; min-width: auto; }
+      .radar-wrap { height: 380px; }
+    }
+
+    @media (max-width: 768px) {
+      .nav-steps { display: none; }
+      .roadmap-visual { flex-direction: column; gap: 1.5rem; }
+      .roadmap-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- NAV -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <div class="logo">レバテックダイレクト</div>
+        </div>
+        <div class="nav-steps" role="tablist" aria-label="ステップ切り替え">
+          <button class="step-btn active" data-step="1" aria-selected="true" role="tab">
+            <span class="step-number">1</span> ギャップ分析
+          </button>
+          <button class="step-btn" data-step="2" aria-selected="false" role="tab">
+            <span class="step-number">2</span> パターン比較
+          </button>
+          <button class="step-btn" data-step="3" aria-selected="false" role="tab">
+            <span class="step-number">3</span> アクションプラン
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main id="mainContent" class="main-content">
+      <!-- Step 1 -->
+      <section id="step1" class="step-panel">
+        <div class="gap-analysis-container">
+          <div class="header-section">
+            <div class="breadcrumb">
+              <span>ホーム</span>
+              <span aria-hidden="true">›</span>
+              <span class="current">あなたの未来の職務経歴書</span>
+            </div>
+            <h1 class="page-title">
+              <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+              あなたと理想のキャリアのギャップ分析
+            </h1>
+            <p class="page-description">
+              現在の状態と目標（<span id="targetRoleText"></span>・年収<span id="targetSalaryText"></span>万円）を比較し、<br />
+              何を改善すれば到達できるかを明確にします
+            </p>
+          </div>
+
+          <div class="profile-summary">
+            <div class="profile-card">
+              <h3>現在の状態</h3>
+              <div class="profile-details">
+                <div class="detail-row">
+                  <span class="label">役職</span>
+                  <span class="value" id="currentRoleText"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">年収</span>
+                  <span class="value highlight" id="currentSalaryText"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">商流</span>
+                  <span class="value" id="currentCompanyTypeText"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="arrow-between">
+              <i class="fa-solid fa-arrow-right fa-2xl" aria-hidden="true"></i>
+              <span class="gap-amount" id="salaryGapText"></span>
+            </div>
+
+            <div class="profile-card target">
+              <h3>目標の状態</h3>
+              <div class="profile-details">
+                <div class="detail-row">
+                  <span class="label">役職</span>
+                  <span class="value" id="targetRoleText2"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">年収</span>
+                  <span class="value highlight-target" id="targetSalaryText2"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">商流</span>
+                  <span class="value">自社開発・元請け</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gap-visualization">
+            <h2 class="section-title">4つの要素別ギャップ</h2>
+
+            <div class="gap-chart-container">
+              <div class="radar-section">
+                <div class="radar-wrap">
+                  <canvas id="radarChart" aria-label="ギャップレーダーチャート" role="img"></canvas>
+                </div>
+                <div class="legend" aria-label="凡例">
+                  <div class="legend-item">
+                    <div class="legend-color current"></div>
+                    <span>現在のあなた</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color target"></div>
+                    <span>目標の状態</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="gap-details" id="gapDetails"></div>
+            </div>
+          </div>
+
+          <button class="next-button" id="toStep2">
+            類似キャリアの成功・失敗パターンを見る
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section id="step2" class="step-panel" style="display:none;">
+        <div class="pattern-comparison-container">
+          <div class="header-section">
+            <div class="breadcrumb">
+              <span>ホーム</span><span aria-hidden="true">›</span>
+              <span>ギャップ分析</span><span aria-hidden="true">›</span>
+              <span class="current">キャリアパターン比較</span>
+            </div>
+            <h1 class="page-title">
+              <i class="fa-solid fa-users" aria-hidden="true"></i>
+              類似キャリアとの比較
+            </h1>
+            <p class="page-description">
+              あなたと似た経歴のエンジニアが、どのような選択で成功・停滞したかを比較します
+            </p>
+          </div>
+
+          <div class="similarity-badges">
+            <div class="similarity-badge success">
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+              <span id="successSimilarityText"></span>
+            </div>
+            <div class="similarity-badge failure">
+              <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+              <span id="failureSimilarityText"></span>
+            </div>
+          </div>
+
+          <div class="three-way-comparison">
+            <!-- Success -->
+            <div class="career-column success">
+              <div class="column-header">
+                <h3>
+                  <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                  <span id="successNameText"></span>
+                </h3>
+                <span class="result-badge success">年収 1,150万円達成</span>
+              </div>
+              <div class="timeline" id="successTimeline"></div>
+            </div>
+
+            <!-- You -->
+            <div class="career-column you">
+              <div class="column-header">
+                <h3>
+                  <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+                  <span id="youNameText"></span>
+                </h3>
+                <span class="result-badge neutral" id="youResultBadge"></span>
+              </div>
+              <div class="timeline" id="youTimeline"></div>
+            </div>
+
+            <!-- Failure -->
+            <div class="career-column failure">
+              <div class="column-header">
+                <h3>
+                  <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                  <span id="failureNameText"></span>
+                </h3>
+                <span class="result-badge failure">年収 800万円で停滞</span>
+              </div>
+              <div class="timeline" id="failureTimeline"></div>
+            </div>
+          </div>
+
+          <div class="insights-section">
+            <h2 class="section-title">成功と失敗の分岐点</h2>
+            <div class="insights-grid">
+              <div class="insight-card success">
+                <h4>
+                  <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                  Aさんが成功した理由
+                </h4>
+                <ul>
+                  <li>2年目に需要の高い技術（AWS・Go）を習得</li>
+                  <li>3年目に自社開発企業へ転職（商流改善）</li>
+                  <li>設計・技術選定の権限を獲得（役割向上）</li>
+                  <li>5年目でマネジメント経験を開始</li>
+                </ul>
+              </div>
+              <div class="insight-card failure">
+                <h4>
+                  <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                  Bさんが停滞した理由
+                </h4>
+                <ul>
+                  <li>同じ技術スタックで5年間（需要が低下）</li>
+                  <li>受託開発から脱却せず（商流固定）</li>
+                  <li>実装のみで設計権限なし（役割停滞）</li>
+                  <li>マネジメント経験の機会なし</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <button class="next-button" id="toStep3">
+            具体的なアクションプランを見る
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section id="step3" class="step-panel" style="display:none;">
+        <div class="action-plan-container">
+          <div class="header-section">
+            <div class="breadcrumb">
+              <span>ホーム</span><span aria-hidden="true">›</span>
+              <span>ギャップ分析</span><span aria-hidden="true">›</span>
+              <span>パターン比較</span><span aria-hidden="true">›</span>
+              <span class="current">アクションプラン</span>
+            </div>
+            <h1 class="page-title">
+              <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+              あなた専用のアクションプラン
+            </h1>
+            <p class="page-description">
+              成功パターンを基に、具体的な行動計画を提案します
+            </p>
+          </div>
+
+          <div class="roadmap-overview">
+            <h2 class="section-title">キャリアロードマップ</h2>
+            <div class="roadmap-visual">
+              <div class="roadmap-step current">
+                <div class="step-marker">📍</div>
+                <div class="step-content">
+                  <span class="step-label">現在</span>
+                  <span class="step-role" id="roadmapCurrentRole"></span>
+                  <span class="step-salary" id="roadmapCurrentSalary"></span>
+                </div>
+              </div>
+
+              <div class="roadmap-arrow">
+                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                <span class="duration">6ヶ月〜1年</span>
+              </div>
+
+              <div class="roadmap-step next">
+                <div class="step-marker">🎯</div>
+                <div class="step-content">
+                  <span class="step-label">次のステップ</span>
+                  <span class="step-role">テックリード</span>
+                  <span class="step-salary">¥900-1,000万</span>
+                </div>
+              </div>
+
+              <div class="roadmap-arrow">
+                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                <span class="duration">1〜2年</span>
+              </div>
+
+              <div class="roadmap-step goal">
+                <div class="step-marker">🏆</div>
+                <div class="step-content">
+                  <span class="step-label">目標</span>
+                  <span class="step-role" id="roadmapTargetRole"></span>
+                  <span class="step-salary" id="roadmapTargetSalary"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-plan-list">
+            <h2 class="section-title">優先順位別アクション</h2>
+            <div id="actionPlanList"></div>
+          </div>
+
+          <div class="recommended-jobs">
+            <h2 class="section-title">推奨求人</h2>
+            <p class="recommended-description">
+              このアクションプランに沿った企業・求人を15件見つけました
+            </p>
+
+            <div class="job-preview">
+              <div class="job-card">
+                <div class="match-rate">
+                  <div class="match-circle">82%</div>
+                  <span>マッチ率</span>
+                </div>
+                <div class="job-info">
+                  <h4>SaaS企業でのバックエンドエンジニア</h4>
+                  <p class="company">成長中のBtoB SaaS企業</p>
+                  <div class="job-tags">
+                    <span class="tag">Go</span>
+                    <span class="tag">AWS</span>
+                    <span class="tag">技術選定権限あり</span>
+                  </div>
+                  <div class="salary-range">¥800-1,100万</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="view-all-jobs">
+              全15件の推奨求人を見る
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Data (Reactのstate/constをJSに移植)
+    // -----------------------------
+    const currentProfile = {
+      name: "あなた",
+      currentRole: "シニアバックエンドエンジニア",
+      experience: "5年",
+      currentSalary: 750,
+      targetSalary: 1200,
+      currentCompanyType: "受託開発",
+      targetRole: "エンジニアリングマネージャー"
+    };
+
+    const gapData = {
+      dimensions: [
+        {
+          name: '商流',
+          current: 60,
+          target: 90,
+          currentLabel: '受託開発（2次請け）',
+          targetLabel: '自社開発・元請け',
+          gap: 30,
+          impact: '年収への影響: +200万円'
+        },
+        {
+          name: '需要',
+          current: 70,
+          target: 85,
+          currentLabel: 'Ruby on Rails中心',
+          targetLabel: 'クラウド+モダン言語',
+          gap: 15,
+          impact: '年収への影響: +150万円'
+        },
+        {
+          name: '役割',
+          current: 50,
+          target: 85,
+          currentLabel: 'メンバー・実装担当',
+          targetLabel: 'テックリード・設計権限',
+          gap: 35,
+          impact: '年収への影響: +250万円'
+        },
+        {
+          name: 'スキル',
+          current: 75,
+          target: 90,
+          currentLabel: 'Rails実装スキル',
+          targetLabel: 'インフラ+設計+マネジメント',
+          gap: 15,
+          impact: '年収への影響: +100万円'
+        }
+      ]
+    };
+
+    const careerPatterns = {
+      you: {
+        name: "あなた（現在）",
+        timeline: [
+          {
+            year: '1年目',
+            company: '受託開発企業A',
+            type: '受託',
+            role: 'バックエンドエンジニア',
+            salary: 600,
+            skills: ['Ruby on Rails', 'MySQL'],
+            responsibility: '実装担当',
+            hasGap: false
+          },
+          {
+            year: '3年目',
+            company: '受託開発企業A',
+            type: '受託',
+            role: 'シニアエンジニア',
+            salary: 700,
+            skills: ['Ruby on Rails', 'MySQL', 'jQuery'],
+            responsibility: '実装担当',
+            hasGap: true,
+            gapReasons: ['商流が改善されていない', '新技術への投資不足']
+          },
+          {
+            year: '5年目（現在）',
+            company: '受託開発企業B',
+            type: '受託',
+            role: 'シニアバックエンドエンジニア',
+            salary: 750,
+            skills: ['Ruby on Rails', 'MySQL', 'AWS（基礎）'],
+            responsibility: '実装担当',
+            hasGap: true,
+            gapReasons: ['設計・技術選定の権限なし', 'マネジメント経験なし', 'クラウド経験が浅い']
+          }
+        ]
+      },
+      success: {
+        name: "Aさん（成功パターン）",
+        similarity: 89,
+        timeline: [
+          {
+            year: '1年目',
+            company: '受託開発企業C',
+            type: '受託',
+            role: 'バックエンドエンジニア',
+            salary: 620,
+            skills: ['Ruby on Rails', 'PostgreSQL'],
+            responsibility: '実装担当',
+            hasGap: false,
+            isPositive: true
+          },
+          {
+            year: '2年目',
+            company: '受託開発企業C',
+            type: '受託',
+            role: 'バックエンドエンジニア',
+            salary: 700,
+            skills: ['Ruby on Rails', 'AWS', 'Go（学習開始）'],
+            responsibility: '実装+AWS構築',
+            action: 'AWS認定資格取得、Goの業務外学習',
+            hasGap: false,
+            isPositive: true
+          },
+          {
+            year: '3年目',
+            company: 'SaaS企業D（自社開発）',
+            type: '自社',
+            role: 'シニアエンジニア',
+            salary: 900,
+            skills: ['Go', 'AWS', 'Kubernetes', 'Ruby'],
+            responsibility: '設計・技術選定',
+            action: '自社開発企業へ転職、技術選定の権限獲得',
+            hasGap: false,
+            isPositive: true
+          },
+          {
+            year: '5年目',
+            company: 'SaaS企業D',
+            type: '自社',
+            role: 'テックリード',
+            salary: 1150,
+            skills: ['Go', 'AWS', 'Kubernetes', 'マネジメント'],
+            responsibility: 'チーム3名マネジメント+技術戦略',
+            action: 'マネジメント経験開始',
+            hasGap: false,
+            isPositive: true
+          }
+        ]
+      },
+      failure: {
+        name: "Bさん（停滞パターン）",
+        similarity: 85,
+        timeline: [
+          {
+            year: '1年目',
+            company: '受託開発企業E',
+            type: '受託',
+            role: 'バックエンドエンジニア',
+            salary: 600,
+            skills: ['Ruby on Rails', 'MySQL'],
+            responsibility: '実装担当',
+            hasGap: false
+          },
+          {
+            year: '3年目',
+            company: '受託開発企業E',
+            type: '受託',
+            role: 'シニアエンジニア',
+            salary: 720,
+            skills: ['Ruby on Rails', 'MySQL'],
+            responsibility: '実装担当',
+            hasGap: true,
+            gapReasons: ['新技術習得なし', '商流変化なし'],
+            isNegative: true
+          },
+          {
+            year: '5年目',
+            company: '受託開発企業F',
+            type: '受託',
+            role: 'リードエンジニア',
+            salary: 800,
+            skills: ['Ruby on Rails', 'MySQL', 'レガシーシステム'],
+            responsibility: '保守・実装',
+            hasGap: true,
+            gapReasons: ['レガシー技術中心', '設計権限なし', 'マネジメント経験なし'],
+            isNegative: true
+          }
+        ]
+      }
+    };
+
+    const actionPlan = [
+      {
+        priority: '最優先',
+        period: '3ヶ月以内',
+        action: 'AWS認定資格（SAA）取得',
+        whyImportant: '需要ギャップを埋める',
+        impact: { dimension: '需要', point: '+10pt', salary: '+100万円の期待値' },
+        nextStep: '1. Udemyで学習開始（週5時間） 2. ハンズオン実践 3. 受験'
+      },
+      {
+        priority: '最優先',
+        period: '6ヶ月以内',
+        action: 'Go言語の実務レベル習得',
+        whyImportant: '需要・スキルギャップを埋める',
+        impact: { dimension: '需要+スキル', point: '+15pt', salary: '+150万円の期待値' },
+        nextStep: '1. Go公式チュートリアル 2. 個人プロジェクト作成 3. 業務で小規模導入提案'
+      },
+      {
+        priority: '優先',
+        period: '1年以内',
+        action: '自社開発・元請け企業への転職',
+        whyImportant: '商流ギャップを埋める最重要施策',
+        impact: { dimension: '商流', point: '+30pt', salary: '+200-300万円の期待値' },
+        nextStep: '1. AWS・Go習得後に転職活動 2. SaaS・自社サービス企業を中心に 3. 技術選定権限を確認'
+      },
+      {
+        priority: '重要',
+        period: '1-2年',
+        action: '設計・技術選定の経験獲得',
+        whyImportant: '役割ギャップを埋める',
+        impact: { dimension: '役割', point: '+20pt', salary: '+150万円の期待値' },
+        nextStep: '1. 転職先で設計レビュー参加 2. 小規模な技術選定から 3. アーキテクチャ提案'
+      }
+    ];
+
+    // -----------------------------
+    // Render helpers
+    // -----------------------------
+    const el = (id) => document.getElementById(id);
+
+    const setText = (id, value) => { el(id).textContent = value; };
+
+    const currencyMan = (n) => `¥${n}万`;
+
+    function createGapDetailCard(dim) {
+      const wrap = document.createElement("div");
+      wrap.className = "gap-detail-card";
+
+      wrap.innerHTML = `
+        <div class="gap-header">
+          <h4>${dim.name}</h4>
+          <span class="gap-badge">ギャップ: ${dim.gap}pt</span>
+        </div>
+        <div class="gap-comparison">
+          <div class="comparison-item current">
+            <span class="label">現在</span>
+            <span class="value">${dim.currentLabel}</span>
+            <div class="bar">
+              <div class="fill" style="width:${dim.current}%"></div>
+              <span class="score">${dim.current}pt</span>
+            </div>
+          </div>
+          <div class="comparison-item target">
+            <span class="label">目標</span>
+            <span class="value">${dim.targetLabel}</span>
+            <div class="bar">
+              <div class="fill" style="width:${dim.target}%"></div>
+              <span class="score">${dim.target}pt</span>
+            </div>
+          </div>
+        </div>
+        <div class="impact-note">
+          <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+          <span>${dim.impact}</span>
+        </div>
+      `;
+      return wrap;
+    }
+
+    function createTimelineItem(item, markerKind, columnKind) {
+      // markerKind: positive | gap | negative | neutral
+      const wrap = document.createElement("div");
+      wrap.className = `timeline-item ${columnKind === "success" ? "positive" : ""}`;
+
+      const marker = document.createElement("div");
+      marker.className = `timeline-marker ${markerKind}`;
+
+      marker.innerHTML = `
+        <div class="marker-dot"></div>
+        <div class="marker-line" style="display:${item._isLast ? "none" : "block"};"></div>
+      `;
+
+      const content = document.createElement("div");
+      content.className = "timeline-content";
+
+      const badgeClass =
+        columnKind === "success" ? "success" :
+        columnKind === "you" ? "neutral" : "failure";
+
+      const companyTypeText = (item.type === "自社") ? "自社開発" : "受託開発";
+
+      const skillsHtml = item.skills.map(s => `<span class="skill-tag">${s}</span>`).join("");
+
+      const actionHtml = item.action
+        ? `<div class="action-taken"><i class="fa-solid fa-award" aria-hidden="true"></i><span>${item.action}</span></div>`
+        : "";
+
+      const gapReasonsHtml = (item.hasGap && item.gapReasons)
+        ? `
+          <div class="gap-reasons ${columnKind === "failure" ? "negative" : ""}">
+            <div style="display:flex; align-items:center; gap:.5rem; font-weight:900; color:${columnKind === "failure" ? "#C62828" : "#D84315"};">
+              <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+              <span>ギャップの要因</span>
+            </div>
+            <div class="reasons-list">
+              ${item.gapReasons.map(r => `
+                <div class="reason-item">
+                  <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                  <span>${r}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `
+        : "";
+
+      content.innerHTML = `
+        <div class="year-label">${item.year}</div>
+        <div class="company-type-badge ${badgeClass}">${companyTypeText}</div>
+        <div class="company-name">${item.company}</div>
+        <div class="role-title">${item.role}</div>
+        <div class="salary-tag">${currencyMan(item.salary)}</div>
+        <div class="responsibility">${item.responsibility}</div>
+        <div class="skills">${skillsHtml}</div>
+        ${actionHtml}
+        ${gapReasonsHtml}
+      `;
+
+      wrap.appendChild(marker);
+      wrap.appendChild(content);
+      return wrap;
+    }
+
+    function renderTimeline(containerId, timeline, columnKind) {
+      const container = el(containerId);
+      container.innerHTML = "";
+
+      timeline.forEach((item, idx) => {
+        const _isLast = idx === timeline.length - 1;
+        const enriched = { ...item, _isLast };
+
+        let markerKind = "neutral";
+        if (columnKind === "success") markerKind = "positive";
+        if (columnKind === "you") markerKind = item.hasGap ? "gap" : "neutral";
+        if (columnKind === "failure") markerKind = item.hasGap ? "negative" : "neutral";
+
+        container.appendChild(createTimelineItem(enriched, markerKind, columnKind));
+      });
+    }
+
+    function renderActionPlan() {
+      const list = el("actionPlanList");
+      list.innerHTML = "";
+
+      actionPlan.forEach((a) => {
+        const card = document.createElement("div");
+        card.className = `action-card priority-${a.priority}`;
+
+        card.innerHTML = `
+          <div class="action-header">
+            <div class="action-meta">
+              <span class="priority-badge ${a.priority}">${a.priority}</span>
+              <span class="period-badge">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                ${a.period}
+              </span>
+            </div>
+          </div>
+
+          <h3 class="action-title">${a.action}</h3>
+
+          <div class="action-body">
+            <div class="why-important">
+              <strong>なぜ重要か:</strong>
+              <p>${a.whyImportant}</p>
+            </div>
+
+            <div class="impact-section">
+              <div class="impact-badge">
+                <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+                <div>
+                  <span class="impact-dimension">${a.impact.dimension}</span>
+                  <span class="impact-point">${a.impact.point}</span>
+                </div>
+              </div>
+              <span class="salary-impact">${a.impact.salary}</span>
+            </div>
+
+            <div class="next-steps">
+              <strong>具体的なステップ:</strong>
+              <p>${a.nextStep}</p>
+            </div>
+          </div>
+        `;
+
+        list.appendChild(card);
+      });
+    }
+
+    // -----------------------------
+    // Radar Chart (Recharts -> Chart.js)
+    // -----------------------------
+    let radarChartInstance = null;
+
+    function renderRadarChart() {
+      const ctx = document.getElementById('radarChart');
+
+      if (radarChartInstance) {
+        radarChartInstance.destroy();
+        radarChartInstance = null;
+      }
+
+      const labels = gapData.dimensions.map(d => d.name);
+      const currentValues = gapData.dimensions.map(d => d.current);
+      const targetValues = gapData.dimensions.map(d => d.target);
+
+      radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: '目標',
+              data: targetValues,
+              borderColor: '#FF6B00',
+              backgroundColor: 'rgba(255, 107, 0, 0.25)',
+              pointBackgroundColor: '#FF6B00',
+              pointBorderColor: '#ffffff',
+              pointHoverBackgroundColor: '#FF6B00',
+              pointHoverBorderColor: '#ffffff',
+              borderWidth: 2
+            },
+            {
+              label: '現在',
+              data: currentValues,
+              borderColor: '#0033A0',
+              backgroundColor: 'rgba(0, 51, 160, 0.40)',
+              pointBackgroundColor: '#0033A0',
+              pointBorderColor: '#ffffff',
+              pointHoverBackgroundColor: '#0033A0',
+              pointHoverBorderColor: '#ffffff',
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0,
+              max: 100,
+              ticks: {
+                backdropColor: 'transparent',
+                color: '#64748b',
+                font: { size: 12, weight: '700' }
+              },
+              grid: { color: 'rgba(0, 51, 160, 0.10)' },
+              angleLines: { color: 'rgba(0, 51, 160, 0.10)' },
+              pointLabels: {
+                color: '#111827',
+                font: { size: 14, weight: '800' }
+              }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.r}pt`
+              }
+            }
+          },
+          animation: { duration: 900 }
+        }
+      });
+    }
+
+    // -----------------------------
+    // Step switching (React state -> JS state)
+    // -----------------------------
+    let activeStep = 1;
+
+    function setActiveStep(step) {
+      activeStep = step;
+
+      // toggle panels
+      el("step1").style.display = (step === 1) ? "block" : "none";
+      el("step2").style.display = (step === 2) ? "block" : "none";
+      el("step3").style.display = (step === 3) ? "block" : "none";
+
+      // animate in
+      const main = el("mainContent");
+      main.classList.remove("animate");
+      requestAnimationFrame(() => main.classList.add("animate"));
+
+      // nav active
+      document.querySelectorAll(".step-btn").forEach(btn => {
+        const s = Number(btn.dataset.step);
+        const isActive = s === step;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      // step-specific render
+      if (step === 1) {
+        renderRadarChart();
+      }
+    }
+
+    // -----------------------------
+    // Initial render
+    // -----------------------------
+    function hydrateStaticTexts() {
+      setText("targetRoleText", currentProfile.targetRole);
+      setText("targetSalaryText", currentProfile.targetSalary);
+
+      setText("currentRoleText", currentProfile.currentRole);
+      setText("currentSalaryText", currencyMan(currentProfile.currentSalary));
+      setText("currentCompanyTypeText", currentProfile.currentCompanyType);
+
+      setText("targetRoleText2", currentProfile.targetRole);
+      setText("targetSalaryText2", currencyMan(currentProfile.targetSalary));
+
+      setText("salaryGapText", `年収差 +${currencyMan(currentProfile.targetSalary - currentProfile.currentSalary)}`);
+
+      // Step2
+      setText("successSimilarityText", `Aさん（成功）との類似度: ${careerPatterns.success.similarity}%`);
+      setText("failureSimilarityText", `Bさん（停滞）との類似度: ${careerPatterns.failure.similarity}%`);
+      setText("successNameText", careerPatterns.success.name);
+      setText("youNameText", careerPatterns.you.name);
+      setText("failureNameText", careerPatterns.failure.name);
+      setText("youResultBadge", `年収 ${currentProfile.currentSalary}万円`);
+
+      // Step3 roadmap
+      setText("roadmapCurrentRole", currentProfile.currentRole);
+      setText("roadmapCurrentSalary", currencyMan(currentProfile.currentSalary));
+      setText("roadmapTargetRole", currentProfile.targetRole);
+      setText("roadmapTargetSalary", `${currencyMan(currentProfile.targetSalary)}+`);
+    }
+
+    function renderGapDetails() {
+      const container = el("gapDetails");
+      container.innerHTML = "";
+      gapData.dimensions.forEach(dim => container.appendChild(createGapDetailCard(dim)));
+
+      // trigger bar animation
+      requestAnimationFrame(() => {
+        container.querySelectorAll(".bar .fill").forEach(fill => {
+          // already has inline width; this just nudges repaint
+          fill.style.filter = "saturate(1.02)";
+        });
+      });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".step-btn").forEach(btn => {
+        btn.addEventListener("click", () => setActiveStep(Number(btn.dataset.step)));
+      });
+
+      el("toStep2").addEventListener("click", () => setActiveStep(2));
+      el("toStep3").addEventListener("click", () => setActiveStep(3));
+    }
+
+    // Boot
+    window.addEventListener("DOMContentLoaded", () => {
+      hydrateStaticTexts();
+      renderGapDetails();
+
+      renderTimeline("successTimeline", careerPatterns.success.timeline, "success");
+      renderTimeline("youTimeline", careerPatterns.you.timeline, "you");
+      renderTimeline("failureTimeline", careerPatterns.failure.timeline, "failure");
+
+      renderActionPlan();
+      bindEvents();
+
+      // initial animate
+      const main = el("mainContent");
+      requestAnimationFrame(() => main.classList.add("animate"));
+
+      // initial chart
+      renderRadarChart();
+    });
+  </script>
+</body>
+</html>
